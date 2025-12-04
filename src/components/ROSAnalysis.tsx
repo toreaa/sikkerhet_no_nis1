@@ -25,6 +25,8 @@ import {
   LayoutGrid,
   CheckSquare,
   Square,
+  ArrowUpDown,
+  Filter,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -50,6 +52,10 @@ export function ROSAnalysis({
   const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(
     new Set(assessments.map(a => a.scenario.id))
   )
+  // Sortering og filtrering
+  const [sortBy, setSortBy] = useState<"score" | "category" | "default">("score")
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
+  const [filterRiskLevel, setFilterRiskLevel] = useState<"all" | "critical" | "high" | "medium" | "low">("all")
 
   const matrix = generateRiskMatrix(assessments)
 
@@ -76,6 +82,35 @@ export function ROSAnalysis({
 
   // Filtrerte vurderinger basert på valg
   const selectedAssessments = assessments.filter(a => selectedScenarios.has(a.scenario.id))
+
+  // Sortert og filtrert liste for visning
+  const sortedAndFilteredAssessments = [...assessments]
+    .filter(a => {
+      if (filterRiskLevel === "all") return true
+      return a.riskLevel === filterRiskLevel
+    })
+    .sort((a, b) => {
+      if (sortBy === "score") {
+        return sortOrder === "desc"
+          ? b.riskScore - a.riskScore
+          : a.riskScore - b.riskScore
+      }
+      if (sortBy === "category") {
+        const comparison = a.scenario.category.localeCompare(b.scenario.category)
+        return sortOrder === "desc" ? -comparison : comparison
+      }
+      return 0 // default - original order
+    })
+
+  // Toggle sortering
+  const toggleSort = (newSortBy: "score" | "category" | "default") => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+    } else {
+      setSortBy(newSortBy)
+      setSortOrder("desc")
+    }
+  }
 
   // Funksjon for å kopiere ROS-tabell med formatering
   const copyROSTable = async () => {
@@ -300,26 +335,106 @@ ${i + 1}. ${a.scenario.name}
       {/* ROS-tabell visning */}
       {activeTab === "table" && (
         <div className="space-y-4">
-          {/* Velg-kontroller */}
-          <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">Velg risikoer:</span>
-              <Badge variant="outline" className="font-mono">
-                {selectedScenarios.size} av {assessments.length}
-              </Badge>
+          {/* Kontrollpanel: Sortering, filtrering og valg */}
+          <div className="p-4 rounded-xl border border-border bg-card space-y-4">
+            {/* Sortering og filtrering */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Sorter:</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={sortBy === "score" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSort("score")}
+                    className="gap-1"
+                  >
+                    Risiko {sortBy === "score" && (sortOrder === "desc" ? "↓" : "↑")}
+                  </Button>
+                  <Button
+                    variant={sortBy === "category" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSort("category")}
+                    className="gap-1"
+                  >
+                    Kategori {sortBy === "category" && (sortOrder === "desc" ? "↓" : "↑")}
+                  </Button>
+                  <Button
+                    variant={sortBy === "default" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSortBy("default")}
+                  >
+                    Standard
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Vis:</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={filterRiskLevel === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("all")}
+                  >
+                    Alle ({assessments.length})
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "critical" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("critical")}
+                    className={cn(filterRiskLevel !== "critical" && criticalCount > 0 && "border-red-500/50 text-red-600")}
+                  >
+                    Kritisk ({criticalCount})
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "high" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("high")}
+                    className={cn(filterRiskLevel !== "high" && highCount > 0 && "border-orange-500/50 text-orange-600")}
+                  >
+                    Høy ({highCount})
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "medium" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("medium")}
+                  >
+                    Moderat ({mediumCount})
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "low" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("low")}
+                  >
+                    Lav ({lowCount})
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={selectAll} className="gap-1">
-                <CheckSquare className="h-4 w-4" />
-                Velg alle
-              </Button>
-              <Button variant="outline" size="sm" onClick={selectNone} className="gap-1">
-                <Square className="h-4 w-4" />
-                Fjern alle
-              </Button>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Klikk på en rad for å inkludere/ekskludere fra din ROS
+
+            {/* Velg-kontroller */}
+            <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-border/50">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-foreground">Velg for eksport:</span>
+                <Badge variant="outline" className="font-mono">
+                  {selectedScenarios.size} av {assessments.length}
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={selectAll} className="gap-1">
+                  <CheckSquare className="h-4 w-4" />
+                  Velg alle
+                </Button>
+                <Button variant="outline" size="sm" onClick={selectNone} className="gap-1">
+                  <Square className="h-4 w-4" />
+                  Fjern alle
+                </Button>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Klikk på en rad for å inkludere/ekskludere fra eksport
+              </div>
             </div>
           </div>
 
@@ -361,7 +476,7 @@ ${i + 1}. ${a.scenario.name}
                   </tr>
                 </thead>
                 <tbody>
-                  {assessments.map((assessment, index) => {
+                  {sortedAndFilteredAssessments.map((assessment, index) => {
                     const beforeColors = getRiskColorClasses(assessment.riskScore)
                     const afterColors = getRiskColorClasses(assessment.mitigatedRiskScore)
                     const isSelected = selectedScenarios.has(assessment.scenario.id)
@@ -383,7 +498,10 @@ ${i + 1}. ${a.scenario.name}
                           )}
                         </td>
                         <td className="p-3 text-foreground font-medium">{index + 1}</td>
-                        <td className="p-3 text-foreground font-medium">{assessment.scenario.name}</td>
+                        <td className="p-3 text-foreground font-medium">
+                          <div>{assessment.scenario.name}</div>
+                          <Badge variant="outline" className="text-xs mt-1">{assessment.scenario.category}</Badge>
+                        </td>
                         <td className="p-3 text-muted-foreground text-xs">{assessment.scenario.vulnerabilityDescription}</td>
                         <td className="p-3 text-muted-foreground text-xs">{assessment.scenario.consequenceDescription}</td>
                         <td className="p-3 text-center">
@@ -524,7 +642,7 @@ ${i + 1}. ${a.scenario.name}
       {/* Scenarier-visning */}
       {activeTab === "scenarios" && (
         <div className="space-y-4">
-          {assessments.map((assessment) => {
+          {sortedAndFilteredAssessments.map((assessment) => {
             const colors = getRiskColorClasses(assessment.riskScore)
             const isExpanded = expandedScenario === assessment.scenario.id
 
