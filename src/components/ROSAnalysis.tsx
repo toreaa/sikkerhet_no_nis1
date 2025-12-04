@@ -57,7 +57,11 @@ export function ROSAnalysis({
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
   const [filterRiskLevel, setFilterRiskLevel] = useState<"all" | "critical" | "high" | "medium" | "low">("all")
 
-  const matrix = generateRiskMatrix(assessments)
+  // Filtrerte vurderinger basert på valg (må defineres før matrix)
+  const selectedAssessments = assessments.filter(a => selectedScenarios.has(a.scenario.id))
+
+  // Matrisen skal kun vise valgte scenarier
+  const matrix = generateRiskMatrix(selectedAssessments)
 
   // Hjelpefunksjoner for valg
   const toggleScenario = (id: string) => {
@@ -79,9 +83,6 @@ export function ROSAnalysis({
   const selectNone = () => {
     setSelectedScenarios(new Set())
   }
-
-  // Filtrerte vurderinger basert på valg
-  const selectedAssessments = assessments.filter(a => selectedScenarios.has(a.scenario.id))
 
   // Sortert og filtrert liste for visning
   const sortedAndFilteredAssessments = [...assessments]
@@ -552,6 +553,84 @@ ${i + 1}. ${a.scenario.name}
       {/* Matrise-visning */}
       {activeTab === "matrix" && (
         <div className="space-y-6">
+          {/* Kontrollpanel for matrise */}
+          <div className="p-4 rounded-xl border border-border bg-card space-y-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-foreground">Viser i matrisen:</span>
+                <Badge variant="outline" className="font-mono">
+                  {selectedScenarios.size} av {assessments.length} scenarier
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={selectAll} className="gap-1">
+                  <CheckSquare className="h-4 w-4" />
+                  Velg alle
+                </Button>
+                <Button variant="outline" size="sm" onClick={selectNone} className="gap-1">
+                  <Square className="h-4 w-4" />
+                  Fjern alle
+                </Button>
+              </div>
+            </div>
+
+            {/* Sortering */}
+            <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-border/50">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Sorter liste:</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={sortBy === "score" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSort("score")}
+                    className="gap-1"
+                  >
+                    Risiko {sortBy === "score" && (sortOrder === "desc" ? "↓" : "↑")}
+                  </Button>
+                  <Button
+                    variant={sortBy === "category" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSort("category")}
+                    className="gap-1"
+                  >
+                    Kategori {sortBy === "category" && (sortOrder === "desc" ? "↓" : "↑")}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Vis:</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={filterRiskLevel === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("all")}
+                  >
+                    Alle
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "critical" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("critical")}
+                    className={cn(filterRiskLevel !== "critical" && criticalCount > 0 && "border-red-500/50 text-red-600")}
+                  >
+                    Kritisk
+                  </Button>
+                  <Button
+                    variant={filterRiskLevel === "high" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilterRiskLevel("high")}
+                    className={cn(filterRiskLevel !== "high" && highCount > 0 && "border-orange-500/50 text-orange-600")}
+                  >
+                    Høy
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-border bg-card p-6 overflow-x-auto">
             <h3 className="font-semibold text-foreground mb-4">
               Risikomatrise (Sannsynlighet × Konsekvens)
@@ -609,6 +688,57 @@ ${i + 1}. ${a.scenario.name}
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Liste over scenarier som kan velges bort */}
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h4 className="font-semibold text-foreground mb-4">
+              Scenarier ({sortedAndFilteredAssessments.length} vises)
+            </h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Klikk for å inkludere/ekskludere fra matrisen. Vurder om scenariet er relevant for ditt system.
+            </p>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {sortedAndFilteredAssessments.map((assessment) => {
+                const colors = getRiskColorClasses(assessment.riskScore)
+                const isSelected = selectedScenarios.has(assessment.scenario.id)
+
+                return (
+                  <div
+                    key={assessment.scenario.id}
+                    onClick={() => toggleScenario(assessment.scenario.id)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                      isSelected
+                        ? cn("border-border hover:bg-muted/50", colors.border)
+                        : "border-border/30 bg-muted/20 opacity-50 hover:opacity-70"
+                    )}
+                  >
+                    {isSelected ? (
+                      <CheckSquare className="h-5 w-5 text-primary flex-shrink-0" />
+                    ) : (
+                      <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-foreground truncate">
+                          {assessment.scenario.name}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {assessment.scenario.category}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {assessment.scenario.description}
+                      </p>
+                    </div>
+                    <Badge className={cn(colors.bg, colors.text, "font-bold flex-shrink-0")}>
+                      {assessment.riskScore}
+                    </Badge>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
