@@ -8,11 +8,12 @@ import {
   exposureTypes,
   notificationRequirements,
   importantNotes,
+  nis2UpcomingMeasures,
 } from "@/data/security-data"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LegalBasisLinks } from "@/components/LegalBasisLinks"
-import { ArrowLeft, RotateCcw, Check, AlertTriangle } from "lucide-react"
+import { ArrowLeft, RotateCcw, Check, AlertTriangle, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ResultsViewProps {
@@ -23,7 +24,7 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ exposure, grading, onBack, onReset }: ResultsViewProps) {
-  const [activeTab, setActiveTab] = useState<"technical" | "organizational" | "notifications">("technical")
+  const [activeTab, setActiveTab] = useState<"technical" | "organizational" | "notifications" | "upcoming">("technical")
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
 
   const { technical, organizational } = getMeasuresForLevel(grading, exposure)
@@ -34,6 +35,10 @@ export function ResultsView({ exposure, grading, onBack, onReset }: ResultsViewP
   const applicableNotes = importantNotes.filter(
     (n) => n.level === "all" || n.level === grading
   )
+
+  // NIS2-tiltak filtrert på kategori
+  const upcomingTechnical = nis2UpcomingMeasures.filter((m) => m.category === "technical")
+  const upcomingOrganizational = nis2UpcomingMeasures.filter((m) => m.category === "organizational")
 
   const toggleCheck = (id: string) => {
     const newChecked = new Set(checkedItems)
@@ -154,6 +159,20 @@ export function ResultsView({ exposure, grading, onBack, onReset }: ResultsViewP
             Varslingskrav ({applicableNotifications.length})
           </button>
         )}
+        <button
+          onClick={() => setActiveTab("upcoming")}
+          className={cn(
+            "px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px",
+            activeTab === "upcoming"
+              ? "border-amber-500 text-amber-600 dark:text-amber-400"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            NIS2 2026 ({nis2UpcomingMeasures.length})
+          </span>
+        </button>
       </div>
 
       {/* Content */}
@@ -300,6 +319,108 @@ export function ResultsView({ exposure, grading, onBack, onReset }: ResultsViewP
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {activeTab === "upcoming" && (
+          <div className="space-y-6">
+            {/* Info-boks */}
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-amber-600 dark:text-amber-400 text-sm">
+                    Kommende krav fra NIS2 (forventet 2026)
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Disse tiltakene er ikke lovpålagt ennå, men vil bli det når NIS2-direktivet
+                    implementeres i norsk lov. Start forberedelsene nå for å være klar.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tekniske tiltak */}
+            {upcomingTechnical.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                  Tekniske tiltak ({upcomingTechnical.length})
+                </h3>
+                <div className="space-y-3">
+                  {upcomingTechnical.map((measure) => (
+                    <div
+                      key={measure.id}
+                      className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5 opacity-80"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg border-2 border-amber-500/30 flex-shrink-0">
+                          <Clock className="h-3 w-3 text-amber-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="font-semibold text-foreground/80">
+                              {measure.name}
+                            </h3>
+                            <Badge variant="outline" className="text-xs flex-shrink-0 border-amber-500/50 text-amber-600 dark:text-amber-400">
+                              2026
+                            </Badge>
+                          </div>
+                          <p className="text-muted-foreground text-sm mt-2">
+                            {measure.description}
+                          </p>
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <p className="text-xs text-muted-foreground">
+                              <LegalBasisLinks legalBasis={measure.legal_basis} />
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Organisatoriske tiltak */}
+            {upcomingOrganizational.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                  Organisatoriske tiltak ({upcomingOrganizational.length})
+                </h3>
+                <div className="space-y-3">
+                  {upcomingOrganizational.map((measure) => (
+                    <div
+                      key={measure.id}
+                      className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5 opacity-80"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg border-2 border-amber-500/30 flex-shrink-0">
+                          <Clock className="h-3 w-3 text-amber-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="font-semibold text-foreground/80">
+                              {measure.name}
+                            </h3>
+                            <Badge variant="outline" className="text-xs flex-shrink-0 border-amber-500/50 text-amber-600 dark:text-amber-400">
+                              2026
+                            </Badge>
+                          </div>
+                          <p className="text-muted-foreground text-sm mt-2">
+                            {measure.description}
+                          </p>
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <p className="text-xs text-muted-foreground">
+                              <LegalBasisLinks legalBasis={measure.legal_basis} />
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

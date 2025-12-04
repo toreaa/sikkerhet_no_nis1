@@ -396,6 +396,80 @@ export const organizationalMeasures: Measure[] = [
   },
 ]
 
+// NIS2-tiltak (kommende krav - forventet 2026)
+export const nis2UpcomingMeasures: Measure[] = [
+  {
+    id: "nis2_supply_chain",
+    name: "Leverandørkjedesikkerhet",
+    description: "Systematisk sikkerhetsvurdering av alle leverandører og underleverandører i forsyningskjeden",
+    legal_basis: "NIS2 Art. 21(2)(d)",
+    required: true,
+    category: "organizational",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_management_liability",
+    name: "Ledelsesansvar og opplæring",
+    description: "Eksplisitt personlig ansvar for ledelsen. Obligatorisk cybersikkerhetsopplæring for styre og toppledelse",
+    legal_basis: "NIS2 Art. 20",
+    required: true,
+    category: "organizational",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_crisis_management",
+    name: "Krisehåndtering",
+    description: "Formalisert krisehåndteringsplan med definerte roller, kommunikasjonsplan og regelmessige øvelser",
+    legal_basis: "NIS2 Art. 21(2)(c)",
+    required: true,
+    category: "organizational",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_vulnerability_disclosure",
+    name: "Koordinert sårbarhetshåndtering",
+    description: "Prosess for mottak og håndtering av sårbarhetsrapporter, inkludert ansvarlig offentliggjøring",
+    legal_basis: "NIS2 Art. 21(2)(e)",
+    required: true,
+    category: "organizational",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_secure_development",
+    name: "Sikker utvikling og anskaffelse",
+    description: "Sikkerhet integrert i utviklings- og anskaffelsesprosesser for IKT-produkter og tjenester",
+    legal_basis: "NIS2 Art. 21(2)(e)",
+    required: true,
+    category: "technical",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_zero_trust",
+    name: "Zero Trust-arkitektur",
+    description: "Implementering av Zero Trust-prinsipper med kontinuerlig verifisering av brukere og enheter",
+    legal_basis: "NIS2 Art. 21(2)(i)",
+    required: true,
+    category: "technical",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+  {
+    id: "nis2_asset_management",
+    name: "IKT-aktivaforvaltning",
+    description: "Komplett og oppdatert oversikt over alle IKT-aktiva med eierskap og kritikalitet",
+    legal_basis: "NIS2 Art. 21(2)(i)",
+    required: true,
+    category: "organizational",
+    status: "upcoming",
+    effectiveDate: "2026",
+  },
+]
+
 // Funksjon for å hente tiltak basert på nivå og eksponering
 export function getMeasuresForLevel(
   level: number,

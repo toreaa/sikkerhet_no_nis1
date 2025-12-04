@@ -15,6 +15,7 @@ import { calculateRiskAssessment, RiskAssessment } from "@/data/ros-data"
 import { Shield, BookOpen, HelpCircle, ClipboardCheck } from "lucide-react"
 
 type Step = "start" | "exposure" | "grading" | "results" | "legal" | "classification" | "ros" | "nis2"
+type FlowType = "manual" | "wizard"
 
 export default function Home() {
   const [step, setStep] = useState<Step>("start")
@@ -22,6 +23,7 @@ export default function Home() {
   const [grading, setGrading] = useState<GradingLevel | null>(null)
   const [rosAssessments, setRosAssessments] = useState<RiskAssessment[]>([])
   const [rosExposure, setRosExposure] = useState<"internet" | "helsenett" | "internal">("internal")
+  const [flowType, setFlowType] = useState<FlowType>("manual")
 
   const handleExposureSelect = (type: ExposureType) => {
     setExposure(type)
@@ -37,13 +39,20 @@ export default function Home() {
     setStep("start")
     setExposure(null)
     setGrading(null)
+    setFlowType("manual")
+    setRosAssessments([])
   }
 
   const handleBack = () => {
     if (step === "grading") {
       setStep("exposure")
     } else if (step === "results") {
-      setStep("grading")
+      // Gå tilbake til riktig sted basert på hvilken flyt vi kom fra
+      if (flowType === "wizard") {
+        setStep("ros")
+      } else {
+        setStep("grading")
+      }
     } else if (step === "legal") {
       setStep("start")
     } else if (step === "classification") {
@@ -58,6 +67,7 @@ export default function Home() {
   const handleClassificationComplete = (level: 1 | 2 | 3 | 4, exposureType: "internet" | "helsenett") => {
     setGrading(level)
     setExposure(exposureType)
+    setFlowType("wizard")
     setStep("results")
   }
 
@@ -77,6 +87,7 @@ export default function Home() {
     setRosExposure(fullExposure)
     setGrading(level)
     setExposure(exposureType)
+    setFlowType("wizard")
     setStep("ros")
   }
 

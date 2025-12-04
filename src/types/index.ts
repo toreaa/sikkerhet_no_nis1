@@ -8,6 +8,8 @@ export interface Measure {
   legal_basis: string
   required: boolean
   category: "technical" | "organizational"
+  status?: "current" | "upcoming" // For å markere kommende krav (NIS2)
+  effectiveDate?: string // Når kravet trer i kraft
 }
 
 export interface LegalRequirement {
