@@ -8,8 +8,9 @@ import {
   exposureQuestions,
   calculateRecommendedLevel,
   calculateExposure,
+  calculateDualClassification,
 } from "@/data/classification-data"
-import { gradingLevels } from "@/data/security-data"
+import { gradingLevels, serviceCriticalityLevels, informationClassificationLevels } from "@/data/security-data"
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +20,8 @@ import {
   Shield,
   FileText,
   TrendingUp,
+  Lock,
+  Server,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -106,8 +109,9 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
     return !!currentAnswer
   }
 
-  // Beregn live sikkerhetsnivå basert på nåværende svar
+  // Beregn live sikkerhetsnivå basert på nåværende svar - nå med to dimensjoner
   const liveResult = Object.keys(answers).length > 0 ? calculateRecommendedLevel(answers) : null
+  const liveDualResult = Object.keys(answers).length > 0 ? calculateDualClassification(answers) : null
   const liveGradingInfo = liveResult ? gradingLevels.find((g) => g.level === liveResult.level) : null
 
   const levelColors = {
@@ -126,8 +130,8 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
 
   if (showResult) {
     const result = calculateRecommendedLevel(answers)
+    const dualResult = calculateDualClassification(answers)
     const exposure = calculateExposure(answers)
-    const gradingInfo = gradingLevels.find((g) => g.level === result.level)
 
     const levelTextColors = {
       1: "text-green-600 dark:text-green-400",
@@ -148,6 +152,14 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
       low: "Lav sikkerhet - bør verifiseres",
     }
 
+    // Hent info fra data-arrays
+    const serviceCritInfo = serviceCriticalityLevels.find(
+      (s) => s.level === dualResult.serviceCriticality.level
+    )
+    const infoClassInfo = informationClassificationLevels.find(
+      (i) => i.level === dualResult.informationClassification.level
+    )
+
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <Button variant="ghost" onClick={() => setShowResult(false)} className="gap-2">
@@ -165,30 +177,174 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
           <p className="text-muted-foreground">
             Basert på dine svar anbefales følgende klassifisering
           </p>
+          <Badge className={cn("mt-3", confidenceColors[dualResult.confidence])}>
+            {confidenceLabels[dualResult.confidence]}
+          </Badge>
         </div>
 
-        {/* Resultat-kort */}
-        <div
-          className={cn(
-            "rounded-xl border-2 p-8 text-center",
-            levelColors[result.level]
-          )}
-        >
+        {/* To-dimensjons resultat */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Tjenestekritikalitet */}
           <div
             className={cn(
-              "text-6xl font-bold mb-2",
-              levelTextColors[result.level]
+              "rounded-xl border-2 p-6",
+              levelColors[dualResult.serviceCriticality.level]
             )}
           >
-            Nivå {result.level}
+            <div className="flex items-center gap-3 mb-4">
+              <div className={cn(
+                "flex items-center justify-center w-12 h-12 rounded-xl",
+                levelBgColors[dualResult.serviceCriticality.level]
+              )}>
+                <Server className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Tjenestekritikalitet
+                </div>
+                <div className={cn(
+                  "text-2xl font-bold",
+                  levelTextColors[dualResult.serviceCriticality.level]
+                )}>
+                  {dualResult.serviceCriticality.shortName}
+                </div>
+              </div>
+            </div>
+
+            {/* Nivå-indikator */}
+            <div className="flex items-center gap-1 mb-4">
+              {[1, 2, 3, 4].map((level) => (
+                <div
+                  key={level}
+                  className={cn(
+                    "flex-1 h-2 rounded-full transition-all",
+                    dualResult.serviceCriticality.level >= level
+                      ? levelBgColors[level as 1|2|3|4]
+                      : "bg-muted/30"
+                  )}
+                />
+              ))}
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              {serviceCritInfo?.description}
+            </p>
+
+            {/* Begrunnelse for tjenestekritikalitet */}
+            {dualResult.serviceCriticality.reasoning.length > 0 && (
+              <div className="border-t border-border/50 pt-4 mt-4">
+                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Begrunnelse
+                </h5>
+                <ul className="space-y-1">
+                  {dualResult.serviceCriticality.reasoning.map((reason, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="h-1 w-1 rounded-full bg-current mt-1.5 flex-shrink-0" />
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          <h3 className={cn("text-2xl font-semibold mb-4", levelTextColors[result.level])}>
-            {gradingInfo?.name}
-          </h3>
-          <p className="text-muted-foreground mb-4">{gradingInfo?.description}</p>
-          <Badge className={confidenceColors[result.confidence]}>
-            {confidenceLabels[result.confidence]}
-          </Badge>
+
+          {/* Informasjonsklassifisering */}
+          <div
+            className={cn(
+              "rounded-xl border-2 p-6",
+              levelColors[dualResult.informationClassification.level]
+            )}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className={cn(
+                "flex items-center justify-center w-12 h-12 rounded-xl",
+                levelBgColors[dualResult.informationClassification.level]
+              )}>
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Informasjonsklassifisering
+                </div>
+                <div className={cn(
+                  "text-2xl font-bold",
+                  levelTextColors[dualResult.informationClassification.level]
+                )}>
+                  {dualResult.informationClassification.shortName}
+                </div>
+              </div>
+            </div>
+
+            {/* Nivå-indikator */}
+            <div className="flex items-center gap-1 mb-4">
+              {[1, 2, 3, 4].map((level) => (
+                <div
+                  key={level}
+                  className={cn(
+                    "flex-1 h-2 rounded-full transition-all",
+                    dualResult.informationClassification.level >= level
+                      ? levelBgColors[level as 1|2|3|4]
+                      : "bg-muted/30"
+                  )}
+                />
+              ))}
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              {infoClassInfo?.description}
+            </p>
+
+            {/* Begrunnelse for informasjonsklassifisering */}
+            {dualResult.informationClassification.reasoning.length > 0 && (
+              <div className="border-t border-border/50 pt-4 mt-4">
+                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Begrunnelse
+                </h5>
+                <ul className="space-y-1">
+                  {dualResult.informationClassification.reasoning.map((reason, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="h-1 w-1 rounded-full bg-current mt-1.5 flex-shrink-0" />
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Skala-forklaring */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Info className="h-5 w-5" />
+            Forklaring av nivåer
+          </h4>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h5 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Server className="h-4 w-4" />
+                Tjenestekritikalitet
+              </h5>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><span className="font-medium text-green-600">1. Normal</span> – Tjenesten kan være nede i dager</li>
+                <li><span className="font-medium text-yellow-600">2. Moderat</span> – Nedetid påvirker flere brukere</li>
+                <li><span className="font-medium text-orange-600">3. Høy</span> – Kritisk for daglig drift</li>
+                <li><span className="font-medium text-red-600">4. Kritisk</span> – Umiddelbar fare ved nedetid</li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Informasjonsklassifisering
+              </h5>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><span className="font-medium text-green-600">1. Åpen</span> – Offentlig tilgjengelig informasjon</li>
+                <li><span className="font-medium text-yellow-600">2. Intern</span> – Kun for interne brukere</li>
+                <li><span className="font-medium text-orange-600">3. Skjermet</span> – Sensitive personopplysninger</li>
+                <li><span className="font-medium text-red-600">4. Sterkt skjermet</span> – Særlig beskyttelsesverdig</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* Eksponering */}
@@ -210,29 +366,35 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
           </div>
         </div>
 
-        {/* Begrunnelse */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            Begrunnelse
-          </h4>
-          <ul className="space-y-2">
-            {result.reasoning.map((reason, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                {reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Advarsel ved lav sikkerhet */}
-        {result.confidence === "low" && (
+        {/* Flagg og advarsler */}
+        {dualResult.flags.length > 0 && (
           <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-semibold text-yellow-600 dark:text-yellow-400 text-sm">
+                  Viktige merknader
+                </h4>
+                <ul className="mt-2 space-y-1">
+                  {dualResult.flags.map((flag, i) => (
+                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                      {flag}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Advarsel ved lav sikkerhet */}
+        {dualResult.confidence === "low" && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-red-600 dark:text-red-400 text-sm">
                   Anbefaling
                 </h4>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -297,62 +459,113 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
         Tilbake
       </Button>
 
-      {/* Live sikkerhetsnivå-indikator */}
-      <div className={cn(
-        "rounded-xl border-2 p-4 transition-all duration-500",
-        liveResult ? levelColors[liveResult.level] : "border-border bg-muted/30"
-      )}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      {/* Live klassifiserings-indikator med TO dimensjoner */}
+      <div className="rounded-xl border-2 border-border bg-card p-4 transition-all duration-500">
+        {liveDualResult ? (
+          <div className="space-y-4">
+            {/* Tjenestekritikalitet */}
             <div className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-500",
-              liveResult ? levelBgColors[liveResult.level] : "bg-muted"
+              "rounded-lg border p-3 transition-all duration-500",
+              levelColors[liveDualResult.serviceCriticality.level]
             )}>
-              <TrendingUp className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-500",
+                    levelBgColors[liveDualResult.serviceCriticality.level]
+                  )}>
+                    <Server className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Tjenestekritikalitet
+                    </div>
+                    <div className="font-bold">
+                      {liveDualResult.serviceCriticality.shortName}
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-0.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={cn(
+                        "w-6 h-6 rounded flex items-center justify-center text-xs font-bold transition-all duration-300",
+                        liveDualResult.serviceCriticality.level === level
+                          ? cn(levelBgColors[level as 1|2|3|4], "text-white scale-110")
+                          : liveDualResult.serviceCriticality.level > level
+                          ? cn(levelBgColors[level as 1|2|3|4], "text-white opacity-40")
+                          : "bg-muted/50 text-muted-foreground"
+                      )}
+                    >
+                      {level}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {liveDualResult.serviceCriticality.reasoning.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {liveDualResult.serviceCriticality.reasoning[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Informasjonsklassifisering */}
+            <div className={cn(
+              "rounded-lg border p-3 transition-all duration-500",
+              levelColors[liveDualResult.informationClassification.level]
+            )}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-500",
+                    levelBgColors[liveDualResult.informationClassification.level]
+                  )}>
+                    <Lock className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Informasjonsklassifisering
+                    </div>
+                    <div className="font-bold">
+                      {liveDualResult.informationClassification.shortName}
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-0.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={cn(
+                        "w-6 h-6 rounded flex items-center justify-center text-xs font-bold transition-all duration-300",
+                        liveDualResult.informationClassification.level === level
+                          ? cn(levelBgColors[level as 1|2|3|4], "text-white scale-110")
+                          : liveDualResult.informationClassification.level > level
+                          ? cn(levelBgColors[level as 1|2|3|4], "text-white opacity-40")
+                          : "bg-muted/50 text-muted-foreground"
+                      )}
+                    >
+                      {level}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {liveDualResult.informationClassification.reasoning.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {liveDualResult.informationClassification.reasoning[0]}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted">
+              <TrendingUp className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wide">
-                Estimert sikkerhetsnivå
-              </div>
-              <div className={cn(
-                "font-bold text-lg transition-all duration-500",
-                liveResult ? "" : "text-muted-foreground"
-              )}>
-                {liveResult ? (
-                  <>Nivå {liveResult.level}: {liveGradingInfo?.name}</>
-                ) : (
-                  "Besvar spørsmål for å se nivå"
-                )}
-              </div>
+              <div className="text-xs uppercase tracking-wide">Estimert klassifisering</div>
+              <div className="font-medium">Besvar spørsmål for å se nivåer</div>
             </div>
-          </div>
-
-          {/* Nivå-indikatorer */}
-          <div className="hidden sm:flex items-center gap-1">
-            {[1, 2, 3, 4].map((level) => (
-              <div
-                key={level}
-                className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300",
-                  liveResult?.level === level
-                    ? cn(levelBgColors[level as 1|2|3|4], "text-white scale-110 shadow-lg")
-                    : liveResult && liveResult.level > level
-                    ? cn(levelBgColors[level as 1|2|3|4], "text-white opacity-50")
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {level}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Seneste begrunnelse */}
-        {liveResult && liveResult.reasoning.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-current/10">
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium">Siste faktor:</span> {liveResult.reasoning[liveResult.reasoning.length - 1]}
-            </p>
           </div>
         )}
       </div>

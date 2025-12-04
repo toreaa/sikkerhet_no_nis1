@@ -1,5 +1,111 @@
-import { GradingInfo, ExposureInfo, Measure, LegalRequirement } from "@/types"
+import { GradingInfo, ExposureInfo, Measure, LegalRequirement, ServiceCriticalityInfo, InformationClassificationInfo } from "@/types"
 
+// ==========================================
+// TJENESTEKRITIKALITET (Tilgjengelighet)
+// ==========================================
+export const serviceCriticalityLevels: ServiceCriticalityInfo[] = [
+  {
+    level: 1,
+    name: "Normal",
+    shortName: "1. Normal",
+    description: "Bortfall av tjenesten rammer kun en del av virksomheten og medfører lave økonomiske konsekvenser.",
+    examples: [
+      "Interne støttesystemer",
+      "Ikke-kritiske administrative verktøy",
+    ],
+    legalBasis: ["NSM Grunnprinsipper"],
+  },
+  {
+    level: 2,
+    name: "Moderat",
+    shortName: "2. Moderat",
+    description: "Bortfall av tjenesten kan medføre høye til moderate økonomiske konsekvenser for virksomheten, men har ubetydelige konsekvenser for omdømmet.",
+    examples: [
+      "Interne fagsystemer",
+      "Eksterne informasjonstjenester",
+    ],
+    legalBasis: ["NSM Grunnprinsipper", "Digitalsikkerhetsloven"],
+  },
+  {
+    level: 3,
+    name: "Høy",
+    shortName: "3. Høy",
+    description: "Bortfall av tjenesten vil medføre store ulemper for enkelte virksomheter eller funksjoner. Kan få omdømmemessige konsekvenser for virksomheter eller sektoren samlet.",
+    examples: [
+      "Helsenorge.no",
+      "Adresseregisteret",
+    ],
+    legalBasis: ["Digitalsikkerhetsloven", "Normen"],
+  },
+  {
+    level: 4,
+    name: "Kritisk",
+    shortName: "4. Kritisk",
+    description: "Bortfall av tjenesten vil kunne medføre fare for liv og helse. Benyttes på tjenester som understøtter andre kritiske tjenester.",
+    examples: [
+      "PREG",
+      "Persontjenesten",
+      "Helsenettet",
+    ],
+    legalBasis: ["Digitalsikkerhetsloven", "Sikkerhetsloven"],
+  },
+]
+
+// ==========================================
+// INFORMASJONSKLASSIFISERING (Konfidensialitet)
+// ==========================================
+export const informationClassificationLevels: InformationClassificationInfo[] = [
+  {
+    level: 1,
+    name: "Åpen",
+    shortName: "1. Åpen",
+    description: "Informasjon som kan være offentlig tilgjengelig. Ingen krav til beskyttelse av konfidensialitet.",
+    examples: [
+      "Offentlig informasjon",
+      "Publiserte rapporter",
+      "Generell informasjon om tjenester",
+    ],
+    legalBasis: ["Offentlighetsloven"],
+  },
+  {
+    level: 2,
+    name: "Intern",
+    shortName: "2. Intern",
+    description: "Intern informasjon som ikke skal deles utenfor organisasjonen. Begrenset skade ved lekkasje.",
+    examples: [
+      "Intern dokumentasjon",
+      "Teknisk konfigurasjon",
+      "Interne prosedyrer",
+    ],
+    legalBasis: ["NSM Grunnprinsipper"],
+  },
+  {
+    level: 3,
+    name: "Skjermet",
+    shortName: "3. Skjermet",
+    description: "Sensitiv informasjon som krever beskyttelse. Inkluderer helseopplysninger og personopplysninger.",
+    examples: [
+      "Helseopplysninger",
+      "Pasientjournaler",
+      "Sensitive personopplysninger",
+    ],
+    legalBasis: ["GDPR Art. 9", "Pasientjournalloven", "Normen"],
+  },
+  {
+    level: 4,
+    name: "Sterkt skjermet",
+    shortName: "4. Sterkt skjermet",
+    description: "Særlig sensitiv informasjon som krever høyeste beskyttelsesnivå. Skjermingsverdig informasjon.",
+    examples: [
+      "Skjermingsverdig informasjon (sikkerhetsloven)",
+      "Særlig sensitiv pasientinformasjon",
+      "Nasjonal kritisk infrastruktur-data",
+    ],
+    legalBasis: ["Sikkerhetsloven", "GDPR Art. 9", "Normen"],
+  },
+]
+
+// Legacy - beholdes for bakoverkompatibilitet
 export const gradingLevels: GradingInfo[] = [
   {
     level: 1,

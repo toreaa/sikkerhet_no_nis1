@@ -414,3 +414,195 @@ export function calculateExposure(
   }
   return "internal"
 }
+
+// ==========================================
+// NY FUNKSJON: Beregner begge dimensjoner separat
+// ==========================================
+export interface DualClassificationResult {
+  // Tjenestekritikalitet (tilgjengelighet)
+  serviceCriticality: {
+    level: 1 | 2 | 3 | 4
+    name: string
+    shortName: string
+    reasoning: string[]
+  }
+  // Informasjonsklassifisering (konfidensialitet)
+  informationClassification: {
+    level: 1 | 2 | 3 | 4
+    name: string
+    shortName: string
+    reasoning: string[]
+  }
+  // Samlet
+  flags: string[]
+  exposure: "internet" | "helsenett" | "internal"
+  confidence: "high" | "medium" | "low"
+}
+
+export function calculateDualClassification(
+  answers: Record<string, string | string[]>
+): DualClassificationResult {
+  const flags: string[] = []
+  const criticalityReasons: string[] = []
+  const classificationReasons: string[] = []
+
+  // Poeng for hver dimensjon
+  let criticalityPoints = 0  // Basert på tilgjengelighet/drift
+  let classificationPoints = 0  // Basert på konfidensialitet/data
+
+  // Samle flagg og poeng
+  for (const question of classificationQuestions) {
+    const answerValue = answers[question.id]
+    if (!answerValue) continue
+
+    const answerIds = Array.isArray(answerValue) ? answerValue : [answerValue]
+
+    for (const answerId of answerIds) {
+      const option = question.options.find((o) => o.id === answerId)
+      if (option) {
+        if (option.flags) {
+          flags.push(...option.flags)
+        }
+
+        // Fordel poeng basert på spørsmålstype
+        switch (question.id) {
+          // Konfidensialitet/data-spørsmål
+          case "data_type":
+          case "patient_data":
+          case "confidentiality_impact":
+            classificationPoints += option.points
+            if (option.points >= 2) {
+              classificationReasons.push(`${option.label}`)
+            }
+            break
+
+          // Tilgjengelighet/drift-spørsmål
+          case "infrastructure_impact":
+          case "integration":
+            criticalityPoints += option.points
+            if (option.points >= 2) {
+              criticalityReasons.push(`${option.label}`)
+            }
+            break
+
+          // Påvirker begge
+          case "user_base":
+          case "regulatory":
+            classificationPoints += option.points
+            criticalityPoints += Math.floor(option.points / 2)
+            if (option.points >= 3) {
+              criticalityReasons.push(`${option.label}`)
+              classificationReasons.push(`${option.label}`)
+            }
+            break
+
+          default:
+            // Fordel likt som fallback
+            classificationPoints += Math.ceil(option.points / 2)
+            criticalityPoints += Math.floor(option.points / 2)
+        }
+      }
+    }
+  }
+
+  // Beregn informasjonsklassifisering
+  let infoLevel: 1 | 2 | 3 | 4
+  let infoName: string
+  let infoShortName: string
+
+  if (flags.includes("classified") || flags.includes("national_security") || flags.includes("security_law")) {
+    infoLevel = 4
+    infoName = "Sterkt skjermet"
+    infoShortName = "4. Sterkt skjermet"
+    classificationReasons.unshift("Skjermingsverdig informasjon (Sikkerhetsloven)")
+  } else if (flags.includes("health_data") || flags.includes("patient_identifiable") || flags.includes("normen_required")) {
+    infoLevel = 3
+    infoName = "Skjermet"
+    infoShortName = "3. Skjermet"
+    classificationReasons.unshift("Helseopplysninger/pasientdata")
+  } else if (classificationPoints <= 2) {
+    infoLevel = 1
+    infoName = "Åpen"
+    infoShortName = "1. Åpen"
+    classificationReasons.unshift("Offentlig/åpen informasjon")
+  } else if (classificationPoints <= 5) {
+    infoLevel = 2
+    infoName = "Intern"
+    infoShortName = "2. Intern"
+    classificationReasons.unshift("Intern informasjon")
+  } else if (classificationPoints <= 10) {
+    infoLevel = 3
+    infoName = "Skjermet"
+    infoShortName = "3. Skjermet"
+    classificationReasons.unshift("Sensitiv informasjon")
+  } else {
+    infoLevel = 4
+    infoName = "Sterkt skjermet"
+    infoShortName = "4. Sterkt skjermet"
+    classificationReasons.unshift("Svært sensitiv informasjon")
+  }
+
+  // Beregn tjenestekritikalitet
+  let critLevel: 1 | 2 | 3 | 4
+  let critName: string
+  let critShortName: string
+
+  if (flags.includes("critical_system") || flags.includes("critical_infrastructure")) {
+    critLevel = 4
+    critName = "Kritisk"
+    critShortName = "4. Kritisk"
+    criticalityReasons.unshift("Kritisk for liv og helse")
+  } else if (flags.includes("digitalsikkerhetsloven_required")) {
+    critLevel = Math.max(3, criticalityPoints >= 8 ? 4 : 3) as 3 | 4
+    critName = critLevel === 4 ? "Kritisk" : "Høy"
+    critShortName = critLevel === 4 ? "4. Kritisk" : "3. Høy"
+    criticalityReasons.unshift("Samfunnsviktig tjeneste (Digitalsikkerhetsloven)")
+  } else if (criticalityPoints <= 2) {
+    critLevel = 1
+    critName = "Normal"
+    critShortName = "1. Normal"
+    criticalityReasons.unshift("Begrenset driftskonsekvens")
+  } else if (criticalityPoints <= 5) {
+    critLevel = 2
+    critName = "Moderat"
+    critShortName = "2. Moderat"
+    criticalityReasons.unshift("Moderat driftskonsekvens")
+  } else if (criticalityPoints <= 8) {
+    critLevel = 3
+    critName = "Høy"
+    critShortName = "3. Høy"
+    criticalityReasons.unshift("Betydelig driftskonsekvens")
+  } else {
+    critLevel = 4
+    critName = "Kritisk"
+    critShortName = "4. Kritisk"
+    criticalityReasons.unshift("Kritisk driftskonsekvens")
+  }
+
+  // Beregn eksponering
+  const exposure = calculateExposure(answers)
+
+  // Beregn samlet confidence
+  const totalAnswered = Object.keys(answers).length
+  const confidence: "high" | "medium" | "low" =
+    totalAnswered >= 6 ? "high" :
+    totalAnswered >= 4 ? "medium" : "low"
+
+  return {
+    serviceCriticality: {
+      level: critLevel,
+      name: critName,
+      shortName: critShortName,
+      reasoning: criticalityReasons,
+    },
+    informationClassification: {
+      level: infoLevel,
+      name: infoName,
+      shortName: infoShortName,
+      reasoning: classificationReasons,
+    },
+    flags,
+    exposure,
+    confidence,
+  }
+}

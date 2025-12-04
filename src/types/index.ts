@@ -1,6 +1,12 @@
 export type ExposureType = "internet" | "helsenett"
 export type GradingLevel = 1 | 2 | 3 | 4
 
+// Tjenestekritikalitet (tilgjengelighet/drift)
+export type ServiceCriticalityLevel = 1 | 2 | 3 | 4
+
+// Informasjonsklassifisering (konfidensialitet)
+export type InformationClassificationLevel = 1 | 2 | 3 | 4
+
 export interface Measure {
   id: string
   name: string
@@ -20,6 +26,27 @@ export interface LegalRequirement {
   description: string
 }
 
+// Tjenestekritikalitet-info
+export interface ServiceCriticalityInfo {
+  level: ServiceCriticalityLevel
+  name: string
+  shortName: string
+  description: string
+  examples: string[]
+  legalBasis: string[]
+}
+
+// Informasjonsklassifisering-info
+export interface InformationClassificationInfo {
+  level: InformationClassificationLevel
+  name: string
+  shortName: string
+  description: string
+  examples: string[]
+  legalBasis: string[]
+}
+
+// Legacy - beholdes for bakoverkompatibilitet
 export interface GradingInfo {
   level: GradingLevel
   name: string
