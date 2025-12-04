@@ -310,17 +310,6 @@ ${i + 1}. ${a.scenario.name}
           Risikomatrise
         </button>
         <button
-          onClick={() => setActiveTab("scenarios")}
-          className={cn(
-            "px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px whitespace-nowrap",
-            activeTab === "scenarios"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Detaljer ({assessments.length})
-        </button>
-        <button
           onClick={() => setActiveTab("summary")}
           className={cn(
             "px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px whitespace-nowrap",
@@ -691,55 +680,178 @@ ${i + 1}. ${a.scenario.name}
             </div>
           </div>
 
-          {/* Liste over scenarier som kan velges bort */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h4 className="font-semibold text-foreground mb-4">
-              Scenarier ({sortedAndFilteredAssessments.length} vises)
-            </h4>
-            <p className="text-sm text-muted-foreground mb-4">
-              Klikk for å inkludere/ekskludere fra matrisen. Vurder om scenariet er relevant for ditt system.
-            </p>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {sortedAndFilteredAssessments.map((assessment) => {
-                const colors = getRiskColorClasses(assessment.riskScore)
-                const isSelected = selectedScenarios.has(assessment.scenario.id)
-
-                return (
-                  <div
-                    key={assessment.scenario.id}
-                    onClick={() => toggleScenario(assessment.scenario.id)}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                      isSelected
-                        ? cn("border-border hover:bg-muted/50", colors.border)
-                        : "border-border/30 bg-muted/20 opacity-50 hover:opacity-70"
-                    )}
-                  >
-                    {isSelected ? (
-                      <CheckSquare className="h-5 w-5 text-primary flex-shrink-0" />
-                    ) : (
-                      <Square className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-foreground truncate">
-                          {assessment.scenario.name}
-                        </span>
-                        <Badge variant="outline" className="text-xs">
-                          {assessment.scenario.category}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {assessment.scenario.description}
-                      </p>
-                    </div>
-                    <Badge className={cn(colors.bg, colors.text, "font-bold flex-shrink-0")}>
-                      {assessment.riskScore}
-                    </Badge>
-                  </div>
-                )
-              })}
+          {/* Detaljert liste over scenarier med mulighet for å velge bort */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-foreground">
+                Scenarier ({sortedAndFilteredAssessments.length} vises)
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Bruk checkbox for å inkludere/ekskludere fra matrisen
+              </p>
             </div>
+            {sortedAndFilteredAssessments.map((assessment) => {
+              const colors = getRiskColorClasses(assessment.riskScore)
+              const isExpanded = expandedScenario === assessment.scenario.id
+              const isSelected = selectedScenarios.has(assessment.scenario.id)
+
+              return (
+                <div
+                  key={assessment.scenario.id}
+                  className={cn(
+                    "rounded-xl border bg-card overflow-hidden transition-all",
+                    isSelected ? colors.border : "border-border/30 opacity-50"
+                  )}
+                >
+                  <div className="flex items-start gap-3 p-5">
+                    {/* Checkbox for å velge/fjerne */}
+                    <button
+                      onClick={() => toggleScenario(assessment.scenario.id)}
+                      className="mt-1 flex-shrink-0"
+                    >
+                      {isSelected ? (
+                        <CheckSquare className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Square className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </button>
+
+                    {/* Hovedinnhold - klikk for å ekspandere */}
+                    <button
+                      onClick={() =>
+                        setExpandedScenario(isExpanded ? null : assessment.scenario.id)
+                      }
+                      className="flex-1 text-left"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {assessment.scenario.category}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {getCIALabel(assessment.scenario.ciaImpact)}
+                            </Badge>
+                            <Badge className={cn(colors.bg, colors.text, "text-xs")}>
+                              Før: {assessment.riskScore}
+                            </Badge>
+                            <Badge className={cn(getRiskColorClasses(assessment.mitigatedRiskScore).bg, getRiskColorClasses(assessment.mitigatedRiskScore).text, "text-xs")}>
+                              Etter: {assessment.mitigatedRiskScore}
+                            </Badge>
+                          </div>
+                          <h3 className="font-semibold text-foreground">
+                            {assessment.scenario.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {assessment.scenario.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="text-xs text-muted-foreground">S × K</div>
+                            <div className={cn("font-bold", colors.text)}>
+                              {assessment.adjustedProbability} × {assessment.adjustedConsequence}
+                            </div>
+                          </div>
+                          {isExpanded ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="px-5 pb-5 border-t border-border/50 pt-4 space-y-4 ml-8">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2">Sårbarhet</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {assessment.scenario.vulnerabilityDescription}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2">Konsekvens</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {assessment.scenario.consequenceDescription}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium text-foreground text-sm mb-2">Tekniske detaljer</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {assessment.scenario.technicalDetails}
+                        </p>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2">
+                            Eksisterende tiltak
+                          </h4>
+                          <ul className="text-sm text-muted-foreground space-y-1">
+                            {assessment.applicableExistingMeasures.map((measure, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-blue-500 mt-0.5">✓</span>
+                                {measure}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2 flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-primary" />
+                            Ytterligere tiltak
+                          </h4>
+                          <ul className="text-sm text-muted-foreground space-y-1">
+                            {assessment.applicableAdditionalMeasures.map((measure, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-green-500 mt-0.5">+</span>
+                                {measure}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2">Vurdering før tiltak</h4>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Sannsynlighet:</span> <span className="font-medium">{assessment.adjustedProbability}</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Konsekvens:</span> <span className="font-medium">{assessment.adjustedConsequence}</span>
+                            </div>
+                            <Badge className={cn(colors.bg, colors.text, "font-bold")}>
+                              Risiko: {assessment.riskScore}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm mb-2">Vurdering etter tiltak</h4>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Sannsynlighet:</span> <span className="font-medium">{assessment.mitigatedProbability}</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Konsekvens:</span> <span className="font-medium">{assessment.mitigatedConsequence}</span>
+                            </div>
+                            <Badge className={cn(getRiskColorClasses(assessment.mitigatedRiskScore).bg, getRiskColorClasses(assessment.mitigatedRiskScore).text, "font-bold")}>
+                              Risiko: {assessment.mitigatedRiskScore}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <div className="rounded-xl border border-border bg-card p-6">
@@ -766,158 +878,6 @@ ${i + 1}. ${a.scenario.name}
               ))}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Scenarier-visning */}
-      {activeTab === "scenarios" && (
-        <div className="space-y-4">
-          {sortedAndFilteredAssessments.map((assessment) => {
-            const colors = getRiskColorClasses(assessment.riskScore)
-            const isExpanded = expandedScenario === assessment.scenario.id
-
-            return (
-              <div
-                key={assessment.scenario.id}
-                className={cn(
-                  "rounded-xl border bg-card overflow-hidden transition-all",
-                  colors.border
-                )}
-              >
-                <button
-                  onClick={() =>
-                    setExpandedScenario(isExpanded ? null : assessment.scenario.id)
-                  }
-                  className="w-full p-5 text-left"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
-                          {assessment.scenario.category}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {getCIALabel(assessment.scenario.ciaImpact)}
-                        </Badge>
-                        <Badge className={cn(colors.bg, colors.text, "text-xs")}>
-                          Før: {assessment.riskScore}
-                        </Badge>
-                        <Badge className={cn(getRiskColorClasses(assessment.mitigatedRiskScore).bg, getRiskColorClasses(assessment.mitigatedRiskScore).text, "text-xs")}>
-                          Etter: {assessment.mitigatedRiskScore}
-                        </Badge>
-                      </div>
-                      <h3 className="font-semibold text-foreground">
-                        {assessment.scenario.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {assessment.scenario.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="text-xs text-muted-foreground">S × K</div>
-                        <div className={cn("font-bold", colors.text)}>
-                          {assessment.adjustedProbability} × {assessment.adjustedConsequence}
-                        </div>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-
-                {isExpanded && (
-                  <div className="px-5 pb-5 border-t border-border/50 pt-4 space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2">Sårbarhet</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {assessment.scenario.vulnerabilityDescription}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2">Konsekvens</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {assessment.scenario.consequenceDescription}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium text-foreground text-sm mb-2">Tekniske detaljer</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {assessment.scenario.technicalDetails}
-                      </p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2">
-                          Eksisterende tiltak
-                        </h4>
-                        <ul className="text-sm text-muted-foreground space-y-1">
-                          {assessment.applicableExistingMeasures.map((measure, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-blue-500 mt-0.5">✓</span>
-                              {measure}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2 flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-primary" />
-                          Ytterligere tiltak
-                        </h4>
-                        <ul className="text-sm text-muted-foreground space-y-1">
-                          {assessment.applicableAdditionalMeasures.map((measure, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-green-500 mt-0.5">+</span>
-                              {measure}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2">Vurdering før tiltak</h4>
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Sannsynlighet:</span> <span className="font-medium">{assessment.adjustedProbability}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Konsekvens:</span> <span className="font-medium">{assessment.adjustedConsequence}</span>
-                          </div>
-                          <Badge className={cn(colors.bg, colors.text, "font-bold")}>
-                            Risiko: {assessment.riskScore}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground text-sm mb-2">Vurdering etter tiltak</h4>
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Sannsynlighet:</span> <span className="font-medium">{assessment.mitigatedProbability}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Konsekvens:</span> <span className="font-medium">{assessment.mitigatedConsequence}</span>
-                          </div>
-                          <Badge className={cn(getRiskColorClasses(assessment.mitigatedRiskScore).bg, getRiskColorClasses(assessment.mitigatedRiskScore).text, "font-bold")}>
-                            Risiko: {assessment.mitigatedRiskScore}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
         </div>
       )}
 
