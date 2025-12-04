@@ -257,11 +257,11 @@ export const classificationQuestions: ClassificationQuestion[] = [
         flags: ["normen_required"],
       },
       {
-        id: "nis2",
-        label: "NIS2-direktivet",
-        description: "Kritisk infrastruktur eller viktig samfunnsfunksjon",
+        id: "digitalsikkerhetsloven",
+        label: "Digitalsikkerhetsloven",
+        description: "Samfunnsviktig tjeneste i helsesektoren (gjeldende fra okt. 2025)",
         points: 3,
-        flags: ["nis2_required"],
+        flags: ["digitalsikkerhetsloven_required"],
       },
       {
         id: "security_law",

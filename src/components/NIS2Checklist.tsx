@@ -442,12 +442,29 @@ export function NIS2Checklist({ onBack }: NIS2ChecklistProps) {
           <Shield className="h-8 w-8 text-primary" />
         </div>
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          NIS2 Compliance Sjekkliste
+          NIS2 Forberedelsessjekkliste
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Interaktiv sjekkliste basert på NIS2-direktivet (Digital sikkerhetsloven i Norge).
-          Bruk denne for å vurdere din organisasjons etterlevelse av kravene.
+          Forbered deg på kommende NIS2-krav (forventet implementert i Norge 2026).
+          Bruk denne for å vurdere din organisasjons modenhet mot fremtidige krav.
         </p>
+      </div>
+
+      {/* Status-boks */}
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="flex items-start gap-3">
+          <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-amber-600 dark:text-amber-400 text-sm">
+              Kommende regelverk - ikke gjeldende ennå
+            </h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              NIS2-direktivet er <strong>ikke implementert i norsk lov ennå</strong>.
+              Digitalsikkerhetsloven (NIS1) trådte i kraft 1. oktober 2025. NIS2 forventes implementert i 2026
+              med strengere krav. Bruk denne sjekklisten for å forberede deg på kommende krav.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Info-boks */}
@@ -456,12 +473,12 @@ export function NIS2Checklist({ onBack }: NIS2ChecklistProps) {
           <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
           <div>
             <h4 className="font-semibold text-blue-600 dark:text-blue-400 text-sm">
-              Om NIS2 og Digital sikkerhetsloven
+              Om NIS2-direktivet
             </h4>
             <p className="text-sm text-muted-foreground mt-1">
-              NIS2-direktivet er EUs regelverk for cybersikkerhet i kritiske sektorer, inkludert helse.
-              I Norge implementeres dette gjennom Digital sikkerhetsloven. Helsesektoren regnes som
-              &ldquo;essential entity&rdquo; og er underlagt de strengeste kravene.
+              NIS2 er EUs oppdaterte regelverk for cybersikkerhet i kritiske sektorer.
+              Helsesektoren regnes som &ldquo;essential entity&rdquo; og vil være underlagt
+              de strengeste kravene. NIS2 utvider og skjerper kravene fra NIS1/Digitalsikkerhetsloven.
             </p>
             <a
               href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"

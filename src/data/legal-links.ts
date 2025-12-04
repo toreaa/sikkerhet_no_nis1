@@ -72,14 +72,56 @@ export const legalLinks: Record<string, { url: string; label: string }> = {
     label: "Normen",
   },
 
-  // NIS2
+  // Digitalsikkerhetsloven (gjeldende fra 1. oktober 2025)
+  "Digitalsikkerhetsloven": {
+    url: "https://lovdata.no/dokument/NL/lov/2023-12-20-108",
+    label: "Digitalsikkerhetsloven",
+  },
+  "Digitalsikkerhetsloven § 7": {
+    url: "https://lovdata.no/dokument/NL/lov/2023-12-20-108/§7",
+    label: "Digitalsikkerhetsloven § 7",
+  },
+  "Digitalsikkerhetsloven § 8": {
+    url: "https://lovdata.no/dokument/NL/lov/2023-12-20-108/§8",
+    label: "Digitalsikkerhetsloven § 8",
+  },
+  "Digitalsikkerhetsloven § 9": {
+    url: "https://lovdata.no/dokument/NL/lov/2023-12-20-108/§9",
+    label: "Digitalsikkerhetsloven § 9",
+  },
+  "Digitalsikkerhetsforskriften": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131",
+    label: "Digitalsikkerhetsforskriften",
+  },
+  "Digitalsikkerhetsforskriften § 7": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131/§7",
+    label: "Digitalsikkerhetsforskriften § 7",
+  },
+  "Digitalsikkerhetsforskriften § 8": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131/§8",
+    label: "Digitalsikkerhetsforskriften § 8",
+  },
+  "Digitalsikkerhetsforskriften § 9": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131/§9",
+    label: "Digitalsikkerhetsforskriften § 9",
+  },
+  "Digitalsikkerhetsforskriften § 10": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131/§10",
+    label: "Digitalsikkerhetsforskriften § 10",
+  },
+  "Digitalsikkerhetsforskriften § 13": {
+    url: "https://lovdata.no/dokument/SF/forskrift/2025-06-20-1131/§13",
+    label: "Digitalsikkerhetsforskriften § 13",
+  },
+
+  // NIS2 (kommende - forventet 2026)
   "NIS2": {
     url: "https://www.regjeringen.no/no/sub/eos-notatbasen/notatene/2021/feb/nis2-direktivet/id2846097/",
-    label: "NIS2",
+    label: "NIS2 (kommende)",
   },
   "NIS2 Art. 21": {
-    url: "https://www.regjeringen.no/no/sub/eos-notatbasen/notatene/2021/feb/nis2-direktivet/id2846097/",
-    label: "NIS2 Art. 21",
+    url: "https://www.nis-2-directive.com/NIS_2_Directive_Article_21.html",
+    label: "NIS2 Art. 21 (kommende)",
   },
 
   // GDPR

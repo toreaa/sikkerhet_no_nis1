@@ -11,9 +11,28 @@ interface LegalOverviewProps {
 }
 
 const legalDetails = {
+  digitalsikkerhetsloven: {
+    title: "Digitalsikkerhetsloven",
+    status: "Gjeldende (i kraft fra 1. oktober 2025)",
+    keyRequirements: [
+      { title: "Sikkerhetsstyringssystem", description: "Dokumentert system godkjent av virksomhetens leder, gjennomgås årlig", article: "§ 7" },
+      { title: "Risikovurdering", description: "Systematisk vurdering av risikoer for nettverk og informasjonssystemer", article: "Forskrift § 7-8" },
+      { title: "Organisatoriske tiltak", description: "Skriftlige prosedyrer og beredskapsplaner", article: "Forskrift § 9" },
+      { title: "Tekniske tiltak", description: "Autentisering, tilgangskontroll, nettverkssegmentering, overvåkning", article: "Forskrift § 10" },
+      { title: "Fysisk sikkerhet", description: "Adgangskontroll og beskyttelse av infrastruktur", article: "Forskrift § 11" },
+      { title: "Personellsikkerhet", description: "Tilgangsstyring, opplæring, off-boarding", article: "Forskrift § 12" },
+      { title: "Hendelseshåndtering", description: "Beredskap og prosedyrer for sikkerhetshendelser", article: "Forskrift § 13" },
+    ],
+    notifications: [
+      { event: "Betydelig hendelse", deadline: "24 timer", description: "Varsle tilsynsmyndighet om hendelse med betydelig innvirkning" },
+      { event: "Oppdatert rapport", deadline: "72 timer", description: "Oppdatert hendelsesrapport" },
+      { event: "Fullstendig rapport", deadline: "1 måned", description: "Fullstendig hendelsesrapport fra første varsel" },
+    ],
+    sanctions: "Opptil 25G eller 4% av omsetning, maks 50 mill. NOK",
+  },
   nis2: {
     title: "NIS2-direktivet",
-    status: "Kommende (NIS1 gjeldende fra juli 2025)",
+    status: "Kommende (forventet implementert i Norge 2026)",
     keyRequirements: [
       { title: "Risikovurdering", description: "Systematiske risikovurderinger av nettverk og informasjonssystemer", article: "Art. 21(2)(a)" },
       { title: "Hendelseshåndtering", description: "Prosedyrer for håndtering og varsling av hendelser", article: "Art. 21(2)(b)" },

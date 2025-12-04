@@ -19,7 +19,7 @@ export const gradingLevels: GradingInfo[] = [
       "Interne fagsystemer",
       "Eksterne informasjonstjenester",
     ],
-    legalBasis: ["NSM Grunnprinsipper", "NIS2"],
+    legalBasis: ["NSM Grunnprinsipper", "Digitalsikkerhetsloven"],
   },
   {
     level: 3,
@@ -29,7 +29,7 @@ export const gradingLevels: GradingInfo[] = [
       "Helsenorge.no",
       "Adresseregisteret",
     ],
-    legalBasis: ["GDPR Art. 9 og 32", "Pasientjournalloven § 22", "Normen", "NIS2"],
+    legalBasis: ["GDPR Art. 9 og 32", "Pasientjournalloven § 22", "Normen", "Digitalsikkerhetsloven"],
   },
   {
     level: 4,
@@ -40,7 +40,7 @@ export const gradingLevels: GradingInfo[] = [
       "Persontjenesten",
       "Helsenettet",
     ],
-    legalBasis: ["Sikkerhetsloven", "Virksomhetssikkerhetsforskriften"],
+    legalBasis: ["Digitalsikkerhetsloven", "Sikkerhetsloven (kun for spesifikke skjermingsverdige systemer)"],
   },
 ]
 
@@ -61,24 +61,24 @@ export const exposureTypes: ExposureInfo[] = [
 
 export const legalRequirements: LegalRequirement[] = [
   {
-    id: "nis2",
-    name: "NIS2-direktivet",
-    source: "EU-direktiv / Digitalsikkerhetsloven",
-    url: "https://www.regjeringen.no/no/sub/eos-notatbasen/notatene/2021/feb/nis2-direktivet/",
-    description: "Krav til cybersikkerhet for kritisk infrastruktur inkl. helsesektoren",
+    id: "digitalsikkerhetsloven",
+    name: "Digitalsikkerhetsloven",
+    source: "Norsk lov (gjeldende fra 1. okt 2025)",
+    url: "https://lovdata.no/dokument/NL/lov/2023-12-20-108",
+    description: "Krav til digital sikkerhet for tilbydere av samfunnsviktige tjenester, inkl. helsesektoren",
   },
   {
     id: "gdpr",
     name: "GDPR / Personopplysningsloven",
     source: "EU-forordning / Norsk lov",
-    url: "https://www.datatilsynet.no/rettigheter-og-plikter/personvernprinsippene/",
+    url: "https://lovdata.no/dokument/NL/lov/2018-06-15-38",
     description: "Krav til behandling og sikring av personopplysninger",
   },
   {
     id: "normen",
     name: "Normen v7.0",
-    source: "Bransjenorm",
-    url: "https://www.helsedirektoratet.no/normen/",
+    source: "Bransjenorm (oppdatert sept. 2025)",
+    url: "https://www.helsedirektoratet.no/normen/norm-for-informasjonssikkerhet-og-personvern-i-helse-og-omsorgssektoren",
     description: "Norm for informasjonssikkerhet og personvern i helse- og omsorgssektoren",
   },
   {
@@ -86,14 +86,7 @@ export const legalRequirements: LegalRequirement[] = [
     name: "Sikkerhetsloven",
     source: "Norsk lov",
     url: "https://lovdata.no/dokument/NL/lov/2018-06-01-24",
-    description: "Beskyttelse av skjermingsverdig informasjon og objekter",
-  },
-  {
-    id: "nsm",
-    name: "NSM Grunnprinsipper v2.1",
-    source: "Veiledning",
-    url: "https://nsm.no/grunnprinsipper",
-    description: "21 prinsipper med 118 sikkerhetstiltak",
+    description: "Beskyttelse av skjermingsverdig informasjon og objekter (gjelder spesifikke systemer)",
   },
   {
     id: "pasientjournal",
@@ -101,6 +94,20 @@ export const legalRequirements: LegalRequirement[] = [
     source: "Norsk lov",
     url: "https://lovdata.no/dokument/NL/lov/2014-06-20-42",
     description: "Krav til behandling av helseopplysninger i pasientjournaler",
+  },
+  {
+    id: "nsm",
+    name: "NSM Grunnprinsipper v2.1",
+    source: "Veiledning",
+    url: "https://nsm.no/regelverk-og-hjelp/rad-og-anbefalinger/grunnprinsipper-for-ikt-sikkerhet/",
+    description: "21 prinsipper med 118 sikkerhetstiltak",
+  },
+  {
+    id: "nis2",
+    name: "NIS2-direktivet",
+    source: "EU-direktiv (kommende, forventet 2026)",
+    url: "https://www.regjeringen.no/no/sub/eos-notatbasen/notatene/2021/feb/nis2-direktivet/id2846097/",
+    description: "Kommende EU-krav til cybersikkerhet - strengere enn NIS1/Digitalsikkerhetsloven",
   },
 ]
 
@@ -127,7 +134,7 @@ export const technicalMeasures: Measure[] = [
     id: "patching",
     name: "Sårbarhetshåndtering / Patching",
     description: "Regelmessige sikkerhetsoppdateringer",
-    legal_basis: "NSM 3.1, NIS2 Art. 21",
+    legal_basis: "NSM 3.1, Digitalsikkerhetsforskriften § 10",
     required: true,
     category: "technical",
   },
@@ -135,7 +142,7 @@ export const technicalMeasures: Measure[] = [
     id: "backup",
     name: "Sikkerhetskopiering",
     description: "Regelmessig backup med testing av gjenoppretting",
-    legal_basis: "NSM 2.9, NIS2 Art. 21",
+    legal_basis: "NSM 2.9, Digitalsikkerhetsforskriften § 10",
     required: true,
     category: "technical",
   },
@@ -291,7 +298,7 @@ export const organizationalMeasures: Measure[] = [
     id: "risk_assessment",
     name: "Risikovurdering",
     description: "Dokumentert risikovurdering ved etablering og endringer",
-    legal_basis: "NIS2 Art. 21, GDPR Art. 32, Normen",
+    legal_basis: "Digitalsikkerhetsforskriften § 7, GDPR Art. 32, Normen",
     required: true,
     category: "organizational",
   },
@@ -299,7 +306,7 @@ export const organizationalMeasures: Measure[] = [
     id: "incident_procedures",
     name: "Hendelsesprosedyrer",
     description: "Dokumenterte prosedyrer for sikkerhetshendelser",
-    legal_basis: "NSM 4.1, NIS2",
+    legal_basis: "NSM 4.1, Digitalsikkerhetsforskriften § 13",
     required: true,
     category: "organizational",
   },
@@ -357,7 +364,7 @@ export const organizationalMeasures: Measure[] = [
     id: "training",
     name: "Sikkerhetsopplæring",
     description: "Opplæring for alle ansatte med tilgang",
-    legal_basis: "Normen, NIS2",
+    legal_basis: "Normen, Digitalsikkerhetsforskriften § 12",
     required: true,
     category: "organizational",
   },
@@ -365,7 +372,7 @@ export const organizationalMeasures: Measure[] = [
     id: "continuity_plan",
     name: "Beredskaps- og kontinuitetsplan",
     description: "Dokumentert og øvet beredskapsplan",
-    legal_basis: "NIS2 Art. 21",
+    legal_basis: "Digitalsikkerhetsforskriften § 13",
     required: true,
     category: "organizational",
   },
@@ -425,11 +432,25 @@ export function getMeasuresForLevel(
 // Varslingskrav
 export const notificationRequirements = [
   {
-    event: "Signifikant sikkerhetshendelse",
+    event: "Hendelse med betydelig innvirkning på tjenestetilbudet",
     deadline: "24 timer",
-    recipient: "Tilsynsmyndighet",
-    legal_basis: "NIS2",
-    level: 3,
+    recipient: "Tilsynsmyndighet (sektormyndighet)",
+    legal_basis: "Digitalsikkerhetsloven § 9",
+    level: 2,
+  },
+  {
+    event: "Oppdatert hendelsesrapport",
+    deadline: "72 timer",
+    recipient: "Tilsynsmyndighet (sektormyndighet)",
+    legal_basis: "Digitalsikkerhetsloven § 9",
+    level: 2,
+  },
+  {
+    event: "Fullstendig hendelsesrapport",
+    deadline: "1 måned",
+    recipient: "Tilsynsmyndighet (sektormyndighet)",
+    legal_basis: "Digitalsikkerhetsloven § 9",
+    level: 2,
   },
   {
     event: "Brudd på personopplysningssikkerheten",
@@ -446,7 +467,7 @@ export const notificationRequirements = [
     level: 3,
   },
   {
-    event: "Sikkerhetstruende hendelse",
+    event: "Sikkerhetstruende hendelse (skjermingsverdige systemer)",
     deadline: "Umiddelbart",
     recipient: "NSM",
     legal_basis: "Sikkerhetsloven",
@@ -468,7 +489,12 @@ export const importantNotes = [
   },
   {
     title: "24-timers varsling ved hendelser",
-    description: "NIS2 krever tidlig varsling til tilsynsmyndighet innen 24 timer ved signifikante sikkerhetshendelser.",
-    level: 3,
+    description: "Digitalsikkerhetsloven § 9 krever varsling til tilsynsmyndighet innen 24 timer ved hendelser med betydelig innvirkning på tjenestetilbudet.",
+    level: 2,
+  },
+  {
+    title: "Digitalsikkerhetsloven gjelder fra 1. oktober 2025",
+    description: "Loven gjelder for tilbydere av samfunnsviktige tjenester i helsesektoren, inkludert regionale helseforetak og kommuner med >50 000 innbyggere. Ingen overgangsperiode.",
+    level: "all",
   },
 ]
