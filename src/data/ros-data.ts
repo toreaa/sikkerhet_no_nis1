@@ -603,6 +603,719 @@ export const threatScenarios: ThreatScenario[] = [
     exposureMultiplier: { internet: 1.1, helsenett: 1.0, internal: 0.8 },
     mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
   },
+
+  // ===== NYE SCENARIOER - HELSESPESIFIKKE =====
+
+  // 16. EPJ-kompromittering
+  {
+    id: "epj_compromise",
+    category: "Helsesystemer",
+    name: "Kompromittert EPJ-system",
+    description: "Elektronisk pasientjournal kompromitteres eller manipuleres",
+    vulnerabilityDescription: "EPJ-systemer med kompleks integrasjonsarkitektur, mange brukere, og lange livssykluser. Ofte basert på eldre teknologi.",
+    consequenceDescription: "Feil pasientinformasjon kan føre til feilbehandling. Massiv datalekkasje av sensitive helseopplysninger. Total driftsstans.",
+    technicalDetails: "EPJ-systemer (DIPS, MetaVision, Helseplattformen) er kritiske knutepunkter. Integrasjoner mot lab, radiologi, legemiddel. HL7/FHIR-grensesnitt må sikres.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Kompleks integrasjonsarkitektur", "Mange brukere", "Legacy-komponenter", "Eksponert mot Helsenett"],
+    consequenceFactors: ["All pasientbehandling avhenger av EPJ", "Juridisk dokumentasjon", "Kritisk for pasientsikkerhet"],
+    existingMeasures: [
+      "Rollebasert tilgangsstyring",
+      "Logging av all tilgang",
+      "Redundant infrastruktur",
+      "Databehandleravtale med leverandør",
+    ],
+    additionalMeasures: [
+      "Segmentering av EPJ-infrastruktur",
+      "Applikasjonsspesifikk WAF",
+      "Kontinuerlig sårbarhetsskanning",
+      "Penetrasjonstesting årlig",
+      "Anomalideteksjon på bruksmønster",
+      "Dokumentert nedetidsprosedyre",
+    ],
+    mitigations: [
+      "Segmentering", "WAF", "Sårbarhetsskanning", "Pen-test", "Anomalideteksjon", "Nedetidsprosedyre"
+    ],
+    relevantFlags: ["health_data", "critical_system", "patient_identifiable"],
+    exposureMultiplier: { internet: 1.4, helsenett: 1.2, internal: 0.8 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 17. Legemiddelsystemsvikt
+  {
+    id: "medication_system",
+    category: "Helsesystemer",
+    name: "Svikt i legemiddelsystem",
+    description: "Kompromittering eller feil i systemer for legemiddelhåndtering",
+    vulnerabilityDescription: "Integrasjon mellom EPJ, apotek, og infusjonspumper. Kompleks logikk for dosering og interaksjonssjekk.",
+    consequenceDescription: "Feil dosering kan være livstruende. Manglende interaksjonsvarsel. Feilmedisinering ved identitetsfeil.",
+    technicalDetails: "FEST, eResept, kurveløsninger. Automatiske infusjonspumper styrt av nettverk. Barcode-verifisering ved administrering.",
+    ciaImpact: { confidentiality: false, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Kompleks systemintegrasjon", "Nettverkstilkoblet utstyr", "Mange manuelle prosesser"],
+    consequenceFactors: ["Direkte pasientpåvirkning", "Livsfarlige feil mulig", "Regulatoriske konsekvenser"],
+    existingMeasures: [
+      "Dobbeltsjekk-rutiner",
+      "Interaksjonsvarsel i system",
+      "Logging av all ordinering",
+    ],
+    additionalMeasures: [
+      "Redundant interaksjonssjekk",
+      "Segmentering av infusjonspumper",
+      "Automatisert integritetssjekk",
+      "Backup-prosedyrer for manuell drift",
+      "Regelmessig testing av varsler",
+      "Opplæring i fallback-prosedyrer",
+    ],
+    mitigations: [
+      "Redundans", "Segmentering", "Integritetssjekk", "Backup-prosedyrer", "Testing"
+    ],
+    relevantFlags: ["health_data", "critical_system"],
+    exposureMultiplier: { internet: 1.0, helsenett: 1.1, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 18. Labsystemfeil
+  {
+    id: "lab_system",
+    category: "Helsesystemer",
+    name: "Kompromittert laboratoriesystem",
+    description: "Angrep eller feil i laboratorieinformasjonssystem (LIS)",
+    vulnerabilityDescription: "LIS-systemer med integrasjon mot analyseinstrumenter, EPJ, og eksterne laboratorier. Ofte eldre systemer.",
+    consequenceDescription: "Feil prøvesvar kan føre til feildiagnose. Forsinkede svar påvirker behandling. Datamanipulering kan gå uoppdaget.",
+    technicalDetails: "Integrasjon via HL7/ASTM. Instrumenter med begrenset sikkerhet. Krav til sporbarhet og akkreditering (ISO 15189).",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Legacy-instrumenter", "Mange integrasjoner", "Begrenset sikkerhetsoppdatering"],
+    consequenceFactors: ["Feildiagnose mulig", "Akkrediteringskrav", "Forsinkelser i behandling"],
+    existingMeasures: [
+      "Kvalitetskontroll av prøvesvar",
+      "Autovalidering med regler",
+      "Logging av endringer",
+    ],
+    additionalMeasures: [
+      "Segmentering av lab-nettverk",
+      "Integritetsovervåking av prøvesvar",
+      "Redundant kommunikasjon til EPJ",
+      "Manuell backup-prosedyre",
+      "Anomalideteksjon på svardata",
+      "Regelmessig sikkerhetsgjennomgang",
+    ],
+    mitigations: [
+      "Segmentering", "Integritetsovervåking", "Redundans", "Backup-prosedyre", "Anomalideteksjon"
+    ],
+    relevantFlags: ["health_data", "critical_system"],
+    exposureMultiplier: { internet: 1.0, helsenett: 1.1, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 19. Bildesystem (RIS/PACS)
+  {
+    id: "imaging_system",
+    category: "Helsesystemer",
+    name: "Kompromittert bildediagnostikk (RIS/PACS)",
+    description: "Angrep på radiologi-informasjonssystem eller bildearkiv",
+    vulnerabilityDescription: "PACS-systemer med store datamengder, DICOM-protokoll med kjente svakheter, og mange integrasjoner.",
+    consequenceDescription: "Tap av bilder forsinker diagnose. Manipulerte bilder kan føre til feilbehandling. Stor datamengde attraktiv for utpressing.",
+    technicalDetails: "DICOM-protokoll, ofte uten kryptering. Store lagringsvolumer. AI-integrasjon for bildediagnose. Teleradiologi-tilgang.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["DICOM-svakheter", "Store datamengder", "Ekstern tilgang for teleradiologi"],
+    consequenceFactors: ["Forsinket diagnose", "Mange pasienter", "Kreftdiagnostikk kritisk"],
+    existingMeasures: [
+      "PACS-arkivering",
+      "Tilgangsstyring",
+      "Backup av bilder",
+    ],
+    additionalMeasures: [
+      "DICOM-kryptering (TLS)",
+      "Segmentering av modaliteter",
+      "Integritetssjekk på bilder",
+      "Sikker teleradiologi-løsning",
+      "Regelmessig testing av gjenoppretting",
+      "Redundant arkivering",
+    ],
+    mitigations: [
+      "DICOM TLS", "Segmentering", "Integritetssjekk", "Sikker fjernaksess", "Redundant arkiv"
+    ],
+    relevantFlags: ["health_data", "critical_system", "patient_identifiable"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.1, internal: 0.8 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 20. Identitetsfeil
+  {
+    id: "patient_identity",
+    category: "Pasientsikkerhet",
+    name: "Pasientidentitetsfeil",
+    description: "Feil pasient kobles til feil data grunnet systemfeil eller manipulering",
+    vulnerabilityDescription: "Kompleks identitetshåndtering på tvers av systemer. Manuelle prosesser. Felles pasienter mellom virksomheter.",
+    consequenceDescription: "Feil pasient får feil behandling. Journalsammenblanding. Alvorlige pasientskader mulig.",
+    technicalDetails: "Personidentifikator (fødselsnummer) som nøkkel. Integrasjon mot Folkeregisteret. D-nummer og hjelpenummer-problematikk.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: false },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Mange integrasjoner", "Manuelle registreringer", "Delt data mellom virksomheter"],
+    consequenceFactors: ["Direkte pasientskade mulig", "Juridisk ansvar", "Tillitsbrudd"],
+    existingMeasures: [
+      "Fødselsnummer-validering",
+      "Dobbeltsjekk ved kritiske prosedyrer",
+      "Fotoverifikasjon",
+    ],
+    additionalMeasures: [
+      "Automatisert identitetsmatch-varsel",
+      "Biometrisk identifikasjon for kritiske prosedyrer",
+      "Integritetssjekk på pasientkobling",
+      "Logging av alle identitetsoppslag",
+      "Regelmessig duplikatsjekk",
+      "Opplæring i identifikasjonsprosedyrer",
+    ],
+    mitigations: [
+      "Automatisk varsel", "Biometri", "Integritetssjekk", "Logging", "Duplikatsjekk"
+    ],
+    relevantFlags: ["health_data", "patient_identifiable", "critical_system"],
+    exposureMultiplier: { internet: 1.0, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // ===== COMPLIANCE OG REGULATORISK =====
+
+  // 21. GDPR-brudd
+  {
+    id: "gdpr_violation",
+    category: "Compliance",
+    name: "Brudd på personvernforordningen (GDPR)",
+    description: "Behandling av personopplysninger i strid med GDPR/personopplysningsloven",
+    vulnerabilityDescription: "Manglende oversikt over databehandling. Utilstrekkelig samtykke. Feil rettslig grunnlag. Manglende DPIA.",
+    consequenceDescription: "Bøter opptil 4% av omsetning eller 20M EUR. Omdømmeskade. Pålegg om stans. Erstatningskrav fra registrerte.",
+    technicalDetails: "GDPR Art. 5-11 (prinsipper), Art. 12-23 (rettigheter), Art. 24-43 (ansvar). Schrems II for overføring til tredjeland.",
+    ciaImpact: { confidentiality: true, integrity: false, availability: false },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Manglende oversikt", "Kompleks dataflyt", "Tredjelandsoverføring", "Manglende DPIA"],
+    consequenceFactors: ["Mange registrerte", "Sensitive kategorier (helse)", "Tidligere påpekninger"],
+    existingMeasures: [
+      "Personvernerklæring",
+      "Behandlingsprotokoll",
+      "Databehandleravtaler",
+    ],
+    additionalMeasures: [
+      "Komplett behandlingsoversikt (Art. 30)",
+      "DPIA for høyrisiko-behandling",
+      "Automatisert innsynsløsning",
+      "Privacy by Design i utvikling",
+      "Regelmessig compliance-audit",
+      "Personvernombud med ressurser",
+    ],
+    mitigations: [
+      "Behandlingsoversikt", "DPIA", "Innsynsløsning", "Privacy by Design", "Compliance-audit"
+    ],
+    relevantFlags: ["health_data", "patient_identifiable"],
+    exposureMultiplier: { internet: 1.2, helsenett: 1.0, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 22. Normen-brudd
+  {
+    id: "normen_violation",
+    category: "Compliance",
+    name: "Brudd på Normen for helse-IKT",
+    description: "Manglende etterlevelse av Norm for informasjonssikkerhet i helse- og omsorgssektoren",
+    vulnerabilityDescription: "Normen er bransjestandard med krav fra Helsedirektoratet. Tilsyn fra Helsetilsynet og Datatilsynet.",
+    consequenceDescription: "Tilsynspålegg. Krav om utbedring. Mulig stans av tjenester. Omdømmeskade i sektoren.",
+    technicalDetails: "Normen v7.0 (2025). Faktaark for spesifikke krav. Krav til logging, tilgangsstyring, kryptering, risikovurdering.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Manglende dokumentasjon", "Utdatert risikovurdering", "Manglende tilgangsgjennomgang"],
+    consequenceFactors: ["Tilsynsvarsel mottatt", "Kritisk tjeneste", "Mange brukere"],
+    existingMeasures: [
+      "Sikkerhetspolicy på plass",
+      "Årlig risikovurdering",
+      "Tilgangsstyring implementert",
+    ],
+    additionalMeasures: [
+      "Gap-analyse mot Normen v7.0",
+      "Dokumentert styringssystem",
+      "Internrevisjon av sikkerhet",
+      "Kontinuerlig compliance-monitorering",
+      "Opplæringsprogram for ansatte",
+      "Leverandøroppfølging mot Normen",
+    ],
+    mitigations: [
+      "Gap-analyse", "Styringssystem", "Internrevisjon", "Compliance-monitorering", "Opplæring"
+    ],
+    relevantFlags: ["health_data", "normen_required"],
+    exposureMultiplier: { internet: 1.1, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 23. Digitalsikkerhetsloven-brudd
+  {
+    id: "digital_security_law",
+    category: "Compliance",
+    name: "Brudd på Digitalsikkerhetsloven",
+    description: "Manglende etterlevelse av Digitalsikkerhetsloven for samfunnsviktige tjenester",
+    vulnerabilityDescription: "Ny lov fra oktober 2025 med krav til sikkerhetsstyring, varsling, og tilsyn. Ingen overgangsperiode.",
+    consequenceDescription: "Overtredelsesgebyr opptil 25G eller 4% av omsetning (maks 50M NOK). Pålegg fra tilsynsmyndighet.",
+    technicalDetails: "Digitalsikkerhetsloven §§ 7-9. Digitalsikkerhetsforskriften §§ 7-13. Krav til sikkerhetsstyringssystem, risikovurdering, varsling.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Ny regulering", "Komplekse krav", "Kort implementeringstid", "Manglende ressurser"],
+    consequenceFactors: ["Samfunnsviktig tjeneste", "Mange brukere", "Kritisk infrastruktur"],
+    existingMeasures: [
+      "Grunnleggende sikkerhetstiltak",
+      "Hendelseshåndtering",
+      "Beredskapsplan",
+    ],
+    additionalMeasures: [
+      "Sikkerhetsstyringssystem godkjent av ledelsen",
+      "Årlig gjennomgang av styringssystem",
+      "24/72/30-dagers varslingsprosedyre",
+      "Dokumentert risikovurdering per § 7-8",
+      "Tekniske tiltak per § 10",
+      "Personellsikkerhet per § 12",
+    ],
+    mitigations: [
+      "Styringssystem", "Varslingsprosedyre", "Risikovurdering", "Tekniske tiltak", "Personellsikkerhet"
+    ],
+    relevantFlags: ["critical_system", "critical_infrastructure", "digitalsikkerhetsloven_required"],
+    exposureMultiplier: { internet: 1.2, helsenett: 1.1, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // ===== TEKNISK INFRASTRUKTUR =====
+
+  // 24. Nettverksbrudd
+  {
+    id: "network_breach",
+    category: "Nettverkssikkerhet",
+    name: "Nettverksinnbrudd og lateral bevegelse",
+    description: "Angriper får tilgang til internt nettverk og beveger seg lateralt",
+    vulnerabilityDescription: "Flat nettverksstruktur, manglende segmentering, eller svak intern sikkerhet gjør lateral bevegelse enkelt.",
+    consequenceDescription: "Angriper får tilgang til flere systemer. Eskalering til domenekontroller. Full kompromittering av infrastruktur.",
+    technicalDetails: "Mimikatz, BloodHound, Cobalt Strike for AD-angrep. Pass-the-hash, Kerberoasting. Gjennomsnittlig 9 dager fra initial tilgang til full kompromittering.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 3,
+    probabilityFactors: ["Flat nettverk", "Legacy-protokoller (SMBv1, LLMNR)", "Manglende EDR", "Delte admin-passord"],
+    consequenceFactors: ["AD-dominans", "Mange systemer", "Kritisk infrastruktur"],
+    existingMeasures: [
+      "Brannmur mellom soner",
+      "Antivirus på klienter",
+      "Domenekontrollere sikret",
+    ],
+    additionalMeasures: [
+      "Mikrosegmentering",
+      "Privileged Access Workstation (PAW)",
+      "LAPS for lokal admin",
+      "Deaktiver legacy-protokoller",
+      "EDR med lateral movement-deteksjon",
+      "AD-herding etter Microsoft best practices",
+    ],
+    mitigations: [
+      "Mikrosegmentering", "PAW", "LAPS", "Legacy-deaktivering", "EDR", "AD-herding"
+    ],
+    relevantFlags: ["critical_infrastructure", "health_data"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.1, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 25. DNS-angrep
+  {
+    id: "dns_attack",
+    category: "Nettverkssikkerhet",
+    name: "DNS-angrep og manipulering",
+    description: "Angrep mot DNS-infrastruktur eller DNS-basert dataeksfiltrering",
+    vulnerabilityDescription: "Intern DNS uten sikkerhet, manglende DNSSEC, eller tillatt DNS-trafikk ut.",
+    consequenceDescription: "Omdirigering til falske tjenester. Dataeksfiltrering via DNS-tunneling. Phishing via falske domener.",
+    technicalDetails: "DNS tunneling for C2 og eksfiltrering. Homoglyph-domener for phishing. DNS over HTTPS kan omgå sikkerhet.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 2,
+    probabilityFactors: ["Ingen DNS-filtrering", "Tillatt all utgående DNS", "Manglende DNSSEC"],
+    consequenceFactors: ["Kritiske tjenester via DNS", "Ingen DNS-logging"],
+    existingMeasures: [
+      "Intern DNS-server",
+      "Brannmur",
+      "E-postfiltrering",
+    ],
+    additionalMeasures: [
+      "DNS-filtrering (Cisco Umbrella, Quad9)",
+      "Blokkering av direkte DNS ut",
+      "DNS-logging og analyse",
+      "DNSSEC-validering",
+      "DNS over HTTPS-policy",
+      "Typosquatting-overvåking",
+    ],
+    mitigations: [
+      "DNS-filtrering", "Utgående blokkering", "DNS-logging", "DNSSEC", "DoH-policy"
+    ],
+    relevantFlags: ["internet", "health_data"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.0, internal: 0.7 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 26. Krypteringssvakheter
+  {
+    id: "crypto_weakness",
+    category: "Kryptografi",
+    name: "Svak eller feil kryptering",
+    description: "Bruk av utdaterte eller feilkonfigurerte krypteringsalgoritmer",
+    vulnerabilityDescription: "Legacy-systemer med gammel kryptering, feilkonfigurerte sertifikater, eller manglende kryptering.",
+    consequenceDescription: "Sensitiv data kan dekrypteres. Man-in-the-middle mulig. Compliance-brudd (GDPR Art. 32).",
+    technicalDetails: "SSL 3.0, TLS 1.0/1.1 sårbare. SHA-1 utfaset. RSA <2048 bit usikkert. Quantum-trusler mot RSA/ECC kommer.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: false },
+    baseProbability: 2,
+    baseConsequence: 2,
+    probabilityFactors: ["Legacy-systemer", "Manglende sertifikathåndtering", "Eldre protokoller tillatt"],
+    consequenceFactors: ["Helseopplysninger", "Finansielle data", "Autentiseringsdata"],
+    existingMeasures: [
+      "HTTPS påkrevd",
+      "Sertifikater fra CA",
+      "TLS aktivert",
+    ],
+    additionalMeasures: [
+      "Minimum TLS 1.2, helst 1.3",
+      "Sertifikatmonitorering og automatisk fornyelse",
+      "Kryptoinventar og policy",
+      "Deaktivering av svake cipher suites",
+      "HSM for nøkkelhåndtering",
+      "Post-quantum krypto-strategi",
+    ],
+    mitigations: [
+      "TLS 1.3", "Sertifikatmonitorering", "Kryptopolitikk", "Cipher-hardening", "HSM"
+    ],
+    relevantFlags: ["health_data", "high_confidentiality"],
+    exposureMultiplier: { internet: 1.4, helsenett: 1.1, internal: 0.8 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 27. Virtualisering/Container-angrep
+  {
+    id: "container_escape",
+    category: "Infrastruktur",
+    name: "Container/VM-escape og hypervisor-angrep",
+    description: "Angriper bryter ut av container eller VM til underliggende infrastruktur",
+    vulnerabilityDescription: "Feilkonfigurerte containere, sårbare images, eller hypervisor-sårbarheter.",
+    consequenceDescription: "Tilgang til andre containere/VM-er. Kompromittering av hele plattformen. Multi-tenant risiko.",
+    technicalDetails: "Container breakout (CVE-2019-5736). VM escape sjeldnere men alvorligere. Kubernetes RBAC-feil. Supply chain via images.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Kjører containere", "Delt infrastruktur", "Manglende image-skanning"],
+    consequenceFactors: ["Multi-tenant", "Kritiske systemer på plattformen"],
+    existingMeasures: [
+      "Oppdatert container runtime",
+      "Ressursbegrensninger",
+      "Nettverkspolicy",
+    ],
+    additionalMeasures: [
+      "Container image-skanning (Trivy, Snyk)",
+      "Runtime-sikkerhet (Falco)",
+      "Pod Security Standards/Policies",
+      "Least-privilege service accounts",
+      "Network policies per namespace",
+      "Regelmessig Kubernetes-sikkerhetsscan",
+    ],
+    mitigations: [
+      "Image-skanning", "Runtime-sikkerhet", "Pod Security", "Least-privilege", "Network policies"
+    ],
+    relevantFlags: ["critical_infrastructure"],
+    exposureMultiplier: { internet: 1.2, helsenett: 1.0, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // ===== TILGJENGELIGHET OG KONTINUITET =====
+
+  // 28. Strømbrudd/infrastruktursvikt
+  {
+    id: "power_failure",
+    category: "Fysisk infrastruktur",
+    name: "Strømbrudd og infrastruktursvikt",
+    description: "Tap av strøm, kjøling, eller annen kritisk infrastruktur",
+    vulnerabilityDescription: "Avhengighet av strøm og kjøling uten tilstrekkelig redundans eller reserveløsninger.",
+    consequenceDescription: "Systemnedetid. Datatap ved ukontrollert nedstenging. Utstyrsskade. Langvarig gjenoppretting.",
+    technicalDetails: "UPS gir 15-30 min. Diesel-aggregat må starte på 10-15 sek. Kjølesvikt kan gi nedetid på timer. Energikriser øker risiko.",
+    ciaImpact: { confidentiality: false, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 2,
+    probabilityFactors: ["Enkelt strøminntak", "Gammel UPS", "Manglende aggregat-test"],
+    consequenceFactors: ["Kritiske systemer", "Lang gjenopprettingstid", "Pasientbehandling påvirkes"],
+    existingMeasures: [
+      "UPS på kritiske systemer",
+      "Diesel-aggregat",
+      "Redundant kjøling",
+    ],
+    additionalMeasures: [
+      "Doble strøminntak fra ulike forsyninger",
+      "Månedlig aggregat-test med last",
+      "Kjøle-redundans N+1",
+      "Automatisk failover av tjenester",
+      "Dokumentert nedstenging-prioritering",
+      "Varslingssystem for infrastruktur",
+    ],
+    mitigations: [
+      "Dual-feed strøm", "Aggregat-testing", "N+1 kjøling", "Automatisk failover", "Nedstengingsprioritering"
+    ],
+    relevantFlags: ["critical_system", "critical_infrastructure"],
+    exposureMultiplier: { internet: 1.0, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 29. Hendelsesresponsvikt
+  {
+    id: "incident_response_failure",
+    category: "Beredskap",
+    name: "Svikt i hendelseshåndtering",
+    description: "Organisasjonen klarer ikke håndtere sikkerhetshendelse effektivt",
+    vulnerabilityDescription: "Manglende hendelsesresponsplan, utrent personell, eller manglende verktøy for respons.",
+    consequenceDescription: "Hendelsen eskalerer. Lengre nedetid. Større datalekkasje. Høyere kostnader.",
+    technicalDetails: "NIST Incident Response (IR) rammeverk. Mean Time To Respond (MTTR). Forensisk kapasitet. Kommunikasjonskrise.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Ingen IR-plan", "Utrent team", "Manglende øvelser", "Ingen 24/7 kapasitet"],
+    consequenceFactors: ["Kritiske systemer", "Regulatoriske varlingskrav", "Omdømme"],
+    existingMeasures: [
+      "Grunnleggende varslingsliste",
+      "IT-vaktordning",
+      "Loggingskapasitet",
+    ],
+    additionalMeasures: [
+      "Dokumentert IR-plan med playbooks",
+      "IR-team med definerte roller",
+      "Årlige IR-øvelser (tabletop og teknisk)",
+      "Retainer med IR-leverandør",
+      "Forensisk verktøy og kompetanse",
+      "Kommunikasjonsplan for krise",
+    ],
+    mitigations: [
+      "IR-plan", "IR-team", "Øvelser", "Retainer", "Forensisk kapasitet", "Kommunikasjonsplan"
+    ],
+    relevantFlags: ["critical_system", "health_data", "critical_infrastructure"],
+    exposureMultiplier: { internet: 1.1, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 2 },
+  },
+
+  // 30. Avhengighetssvikt (single point of failure)
+  {
+    id: "single_point_failure",
+    category: "Arkitektur",
+    name: "Single Point of Failure",
+    description: "Kritiske tjenester avhenger av enkeltkomponenter uten redundans",
+    vulnerabilityDescription: "Sentrale systemer, nettverkskomponenter, eller ekspertise uten backup eller redundans.",
+    consequenceDescription: "Total nedetid ved svikt. Langvarig gjenoppretting. Avhengighet av enkeltpersoner.",
+    technicalDetails: "Database-cluster, load balancer, autentiseringstjeneste, DNS. Nøkkelpersonavhengighet.",
+    ciaImpact: { confidentiality: false, integrity: false, availability: true },
+    baseProbability: 2,
+    baseConsequence: 3,
+    probabilityFactors: ["Ikke-redundant arkitektur", "Budsjettbegrensninger", "Legacy-systemer"],
+    consequenceFactors: ["Mange avhengige systemer", "Lang failover-tid", "Kritisk for drift"],
+    existingMeasures: [
+      "Noe redundans på nettverk",
+      "Daglig backup",
+      "Dokumentasjon",
+    ],
+    additionalMeasures: [
+      "SPOF-analyse av alle kritiske tjenester",
+      "Høytilgjengelighetsarkitektur (HA) for kritiske komponenter",
+      "Aktiv-aktiv eller aktiv-passiv failover",
+      "Geografisk redundans for kritiske data",
+      "Kompetanseredundans (flere kan systemene)",
+      "Regelmessig failover-testing",
+    ],
+    mitigations: [
+      "SPOF-analyse", "HA-arkitektur", "Failover", "Geo-redundans", "Kompetansespredning", "Testing"
+    ],
+    relevantFlags: ["critical_system", "critical_infrastructure"],
+    exposureMultiplier: { internet: 1.0, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 2 },
+  },
+
+  // ===== MENNESKELIGE FAKTORER =====
+
+  // 31. Kompetansemangel
+  {
+    id: "competence_gap",
+    category: "Menneskelige faktorer",
+    name: "Mangel på sikkerhetskompetanse",
+    description: "Utilstrekkelig sikkerhetskompetanse i organisasjonen",
+    vulnerabilityDescription: "Få sikkerhetsressurser, manglende opplæring, eller utdatert kompetanse.",
+    consequenceDescription: "Sårbarheter overses. Feilkonfigurasjoner. Treg respons på hendelser. Dårlige beslutninger.",
+    technicalDetails: "Skills gap i cybersecurity. Konkurranse om talenter. Rask teknologiutvikling. Kompleksitet i moderne trusler.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Lite sikkerhetsteam", "Høy turnover", "Manglende budsett til kompetanse"],
+    consequenceFactors: ["Kritiske systemer", "Kompleks infrastruktur", "Regulatoriske krav"],
+    existingMeasures: [
+      "IT-personell med noe sikkerhetsansvar",
+      "Grunnleggende opplæring",
+      "Ekstern bistand ved behov",
+    ],
+    additionalMeasures: [
+      "Dedikert sikkerhetspersonell",
+      "Sertifiseringsprogram (CISSP, CISM, etc.)",
+      "Regelmessig faglig oppdatering",
+      "Managed Security Service Provider (MSSP)",
+      "Security Champions i utviklingsteam",
+      "Tabletop-øvelser for kompetansebygging",
+    ],
+    mitigations: [
+      "Dedikerte ressurser", "Sertifisering", "Faglig oppdatering", "MSSP", "Security Champions"
+    ],
+    relevantFlags: ["critical_system", "health_data"],
+    exposureMultiplier: { internet: 1.1, helsenett: 1.0, internal: 1.0 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 32. Shadow IT
+  {
+    id: "shadow_it",
+    category: "Menneskelige faktorer",
+    name: "Shadow IT og uautoriserte systemer",
+    description: "Bruk av IKT-løsninger utenfor IT-avdelingens kontroll",
+    vulnerabilityDescription: "Ansatte tar i bruk skytjenester, apper, eller systemer uten godkjenning. Data lagres ukontrollert.",
+    consequenceDescription: "Sensitive data i usikrede løsninger. Compliance-brudd. Ingen backup eller sikkerhet.",
+    technicalDetails: "Dropbox, Google Drive, WhatsApp for pasientdata. Egne Excel-løsninger. Uautoriserte SaaS-tjenester.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: false },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Tungvinte offisielle løsninger", "Manglende opplæring", "Svak policy-håndhevelse"],
+    consequenceFactors: ["Helseopplysninger", "Mange brukere", "GDPR-krav"],
+    existingMeasures: [
+      "IT-policy",
+      "Godkjenningsprosess for nye systemer",
+      "Nettverksovervåking",
+    ],
+    additionalMeasures: [
+      "Cloud Access Security Broker (CASB)",
+      "SaaS-inventory og kontroll",
+      "Brukervennlige godkjente alternativer",
+      "Regelmessig Shadow IT-scan",
+      "Opplæring i datasikkerhet",
+      "Tydelig policy med konsekvenser",
+    ],
+    mitigations: [
+      "CASB", "SaaS-kontroll", "Gode alternativer", "Shadow IT-scan", "Opplæring"
+    ],
+    relevantFlags: ["health_data", "patient_identifiable"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.0, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // 33. Feilkonfigurering av brukere
+  {
+    id: "user_misconfiguration",
+    category: "Menneskelige faktorer",
+    name: "Feilkonfigurering og menneskelige feil",
+    description: "Sikkerhetshendelser forårsaket av utilsiktede feil fra administratorer eller brukere",
+    vulnerabilityDescription: "Komplekse systemer, manglende prosedyrer, eller tidspress fører til feilkonfigurasjoner.",
+    consequenceDescription: "Eksponering av data eller systemer. Nedetid. Sikkerhetshull introdusert.",
+    technicalDetails: "Feilkonfigurert brannmur, åpne S3-buckets, feil i AD-grupper, publiserte secrets i kode.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 3,
+    baseConsequence: 2,
+    probabilityFactors: ["Komplekse systemer", "Manglende 4-øyne prinsipp", "Manuell konfigurasjon"],
+    consequenceFactors: ["Kritiske systemer", "Internett-eksponert"],
+    existingMeasures: [
+      "Endringsrutiner",
+      "Dokumentasjon",
+      "Testing før produksjon",
+    ],
+    additionalMeasures: [
+      "Infrastructure as Code (IaC) med review",
+      "Automatisert konfigurasjonsskanning",
+      "Peer review av kritiske endringer",
+      "Automatiserte deployment-pipelines",
+      "Drift-mot-baseline varsling",
+      "Secret scanning i kode",
+    ],
+    mitigations: [
+      "IaC", "Konfigurasjonsskanning", "Peer review", "CI/CD", "Baseline-varsling", "Secret scanning"
+    ],
+    relevantFlags: ["critical_system", "internet"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.0, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 2, consequenceReduction: 1 },
+  },
+
+  // ===== AVANSERTE TRUSLER =====
+
+  // 34. APT (Advanced Persistent Threat)
+  {
+    id: "apt_attack",
+    category: "Avanserte trusler",
+    name: "Advanced Persistent Threat (APT)",
+    description: "Sofistikert, langvarig angrep fra statlige aktører eller organisert kriminalitet",
+    vulnerabilityDescription: "Høyverdi-mål med sensitive data. Begrenset deteksjonskapasitet mot sofistikerte teknikker.",
+    consequenceDescription: "Langvarig uoppdaget tilstedeværelse. Massiv dataeksfiltrering. Strategisk etterretning. Sabotasje mulig.",
+    technicalDetails: "Zero-days, supply chain, spear phishing. Living-off-the-land teknikker. MITRE ATT&CK framework. Kjente grupper mot helse: Lazarus, APT41.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 1,
+    baseConsequence: 3,
+    probabilityFactors: ["Høyverdi-data (forskning, helse)", "Nasjonal interesse", "Svak deteksjon"],
+    consequenceFactors: ["Strategiske data", "Kritisk infrastruktur", "Nasjonal sikkerhet"],
+    existingMeasures: [
+      "Perimetersikkerhet",
+      "Antivirus/EDR",
+      "Logging",
+    ],
+    additionalMeasures: [
+      "Threat hunting-program",
+      "MITRE ATT&CK-basert deteksjon",
+      "Deception technology (honeypots)",
+      "Network Traffic Analysis (NTA)",
+      "Samarbeid med NSM/HelseCERT",
+      "Red team/Purple team øvelser",
+    ],
+    mitigations: [
+      "Threat hunting", "ATT&CK-deteksjon", "Deception", "NTA", "Myndighetsamarbeid", "Red team"
+    ],
+    relevantFlags: ["critical_infrastructure", "health_data", "security_law"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.1, internal: 0.9 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
+
+  // 35. AI-drevet angrep
+  {
+    id: "ai_attack",
+    category: "Avanserte trusler",
+    name: "AI-forsterket cyberangrep",
+    description: "Angrep som bruker kunstig intelligens for økt effektivitet",
+    vulnerabilityDescription: "Tradisjonelle sikkerhetstiltak kan omgås av AI-optimaliserte angrep. Deepfakes for sosial manipulering.",
+    consequenceDescription: "Mer overbevisende phishing. Automatisert sårbarhetsutnyttelse. Adaptiv malware. Deepfake-svindel.",
+    technicalDetails: "GPT-generert phishing, AI-polymorf malware, deepfake audio/video for CEO fraud, automatisert OSINT.",
+    ciaImpact: { confidentiality: true, integrity: true, availability: true },
+    baseProbability: 2,
+    baseConsequence: 2,
+    probabilityFactors: ["Høyprofilert mål", "Tradisjonelle tiltak kun", "Manglende AI-sikkerhet"],
+    consequenceFactors: ["Finansiell eksponering", "Omdømme", "Kritiske beslutninger"],
+    existingMeasures: [
+      "E-postfiltrering",
+      "Sikkerhetsopplæring",
+      "Verifikasjonsprosedyrer",
+    ],
+    additionalMeasures: [
+      "AI-basert e-postanalyse",
+      "Deepfake-deteksjonsverktøy",
+      "Out-of-band verifikasjon for kritiske handlinger",
+      "AI Security awareness-opplæring",
+      "Kontinuerlig oppdatering av deteksjon",
+      "Samarbeid med sikkerhetsforskere",
+    ],
+    mitigations: [
+      "AI-deteksjon", "Deepfake-verktøy", "Out-of-band verifisering", "AI-opplæring", "Oppdatert deteksjon"
+    ],
+    relevantFlags: ["health_data", "critical_system"],
+    exposureMultiplier: { internet: 1.3, helsenett: 1.0, internal: 0.8 },
+    mitigationEffect: { probabilityReduction: 1, consequenceReduction: 1 },
+  },
 ]
 
 // Hjelpefunksjon for å sjekke om et svar inneholder en verdi
