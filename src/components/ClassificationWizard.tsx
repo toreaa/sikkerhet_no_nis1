@@ -18,6 +18,7 @@ import {
   Info,
   Shield,
   FileText,
+  TrendingUp,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -105,17 +106,28 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
     return !!currentAnswer
   }
 
+  // Beregn live sikkerhetsnivå basert på nåværende svar
+  const liveResult = Object.keys(answers).length > 0 ? calculateRecommendedLevel(answers) : null
+  const liveGradingInfo = liveResult ? gradingLevels.find((g) => g.level === liveResult.level) : null
+
+  const levelColors = {
+    1: "border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400",
+    2: "border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+    3: "border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-400",
+    4: "border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400",
+  }
+
+  const levelBgColors = {
+    1: "bg-green-500",
+    2: "bg-yellow-500",
+    3: "bg-orange-500",
+    4: "bg-red-500",
+  }
+
   if (showResult) {
     const result = calculateRecommendedLevel(answers)
     const exposure = calculateExposure(answers)
     const gradingInfo = gradingLevels.find((g) => g.level === result.level)
-
-    const levelColors = {
-      1: "border-green-500/50 bg-green-500/10",
-      2: "border-yellow-500/50 bg-yellow-500/10",
-      3: "border-orange-500/50 bg-orange-500/10",
-      4: "border-red-500/50 bg-red-500/10",
-    }
 
     const levelTextColors = {
       1: "text-green-600 dark:text-green-400",
@@ -284,6 +296,66 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
         <ArrowLeft className="h-4 w-4" />
         Tilbake
       </Button>
+
+      {/* Live sikkerhetsnivå-indikator */}
+      <div className={cn(
+        "rounded-xl border-2 p-4 transition-all duration-500",
+        liveResult ? levelColors[liveResult.level] : "border-border bg-muted/30"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-500",
+              liveResult ? levelBgColors[liveResult.level] : "bg-muted"
+            )}>
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                Estimert sikkerhetsnivå
+              </div>
+              <div className={cn(
+                "font-bold text-lg transition-all duration-500",
+                liveResult ? "" : "text-muted-foreground"
+              )}>
+                {liveResult ? (
+                  <>Nivå {liveResult.level}: {liveGradingInfo?.name}</>
+                ) : (
+                  "Besvar spørsmål for å se nivå"
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Nivå-indikatorer */}
+          <div className="hidden sm:flex items-center gap-1">
+            {[1, 2, 3, 4].map((level) => (
+              <div
+                key={level}
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300",
+                  liveResult?.level === level
+                    ? cn(levelBgColors[level as 1|2|3|4], "text-white scale-110 shadow-lg")
+                    : liveResult && liveResult.level > level
+                    ? cn(levelBgColors[level as 1|2|3|4], "text-white opacity-50")
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                {level}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Seneste begrunnelse */}
+        {liveResult && liveResult.reasoning.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-current/10">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium">Siste faktor:</span> {liveResult.reasoning[liveResult.reasoning.length - 1]}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Progress */}
       <div className="space-y-2">
