@@ -177,9 +177,6 @@ export function ClassificationWizard({ onComplete, onROS, onBack }: Classificati
           <p className="text-muted-foreground">
             Basert på dine svar anbefales følgende klassifisering
           </p>
-          <Badge className={cn("mt-3", confidenceColors[dualResult.confidence])}>
-            {confidenceLabels[dualResult.confidence]}
-          </Badge>
         </div>
 
         {/* To-dimensjons resultat */}
